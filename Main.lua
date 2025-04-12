@@ -1,30 +1,59 @@
--- Main Script: Command Executor in Chat
+-- =================== Main Script ===================
 
 local player = game.Players.LocalPlayer
+local userInputService = game:GetService("UserInputService")
 local playerGui = player:WaitForChild("PlayerGui")
 local replicatedStorage = game:GetService("ReplicatedStorage")
 
--- Helper Function to Execute Command
-function executeCommand(command, args)
-    if command == "fly" then
-        toggleFly()
-    elseif command == "noclip" then
-        toggleNoClip()
-    elseif command == "spawn" then
-        spawnItem(table.concat(args, " "))
-    elseif command == "kick" then
-        kickPlayer(table.concat(args, " "))
-    elseif command == "announce" then
-        sendAnnouncement(table.concat(args, " "))
-    elseif command == "scriptinfo" then
-        showScriptInfo()
-    else
-        print("Unknown command: " .. command)
-    end
-end
+-- Set up the GUI for the commands
+local gui = Instance.new("ScreenGui")
+gui.Name = "TrollHub"
+gui.Parent = playerGui
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Function for Fly
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 300, 0, 400)
+mainFrame.Position = UDim2.new(0, 100, 0, 100)
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+mainFrame.BackgroundTransparency = 0.5
+mainFrame.Parent = gui
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(0, 300, 0, 50)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "TrollHub - Commands"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextSize = 20
+titleLabel.TextAlign = Enum.TextXAlignment.Center
+titleLabel.Parent = mainFrame
+
+-- Draggable GUI Setup
+local dragStart
+local startPos
+local dragging = false
+
+titleLabel.MouseButton1Down:Connect(function(input)
+    dragging = true
+    dragStart = input.Position
+    startPos = mainFrame.Position
+end)
+
+userInputService.InputChanged:Connect(function(input)
+    if dragging then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+userInputService.InputEnded:Connect(function(input)
+    if dragging then
+        dragging = false
+    end
+end)
+
+-- Command Functions
 local flying = false
+local noclip = false
 local bodyVelocity, bodyGyro
 
 function toggleFly()
@@ -47,9 +76,6 @@ function toggleFly()
     end
 end
 
--- Function for NoClip
-local noclip = false
-
 function toggleNoClip()
     noclip = not noclip
     local character = game.Players.LocalPlayer.Character
@@ -64,7 +90,6 @@ function toggleNoClip()
     end
 end
 
--- Function to Spawn Item
 function spawnItem(itemName)
     local item = game.ReplicatedStorage:FindFirstChild(itemName) or game.ServerStorage:FindFirstChild(itemName)
 
@@ -76,7 +101,6 @@ function spawnItem(itemName)
     end
 end
 
--- Function to Kick Player
 function kickPlayer(playerName)
     local player = game.Players:FindFirstChild(playerName)
     if player then
@@ -86,12 +110,10 @@ function kickPlayer(playerName)
     end
 end
 
--- Function to Send Announcement
 function sendAnnouncement(message)
     game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(message, "All")
 end
 
--- Function to Show Script Info
 function showScriptInfo()
     local infoMessage = [[
         Available Commands:
@@ -101,19 +123,33 @@ function showScriptInfo()
         /spawn (itemName) - Spawns an item (e.g., /spawn Sword).
         /kick (playerName) - Kicks a player from the server (e.g., /kick PlayerName).
         /announce (message) - Sends an announcement message to all players.
+        /scriptinfo - Shows this information.
     ]]
     
     sendAnnouncement(infoMessage)  -- Sends the info to all players
 end
 
--- Listening to Chat for Commands
+-- Command Listener
 game.Players.LocalPlayer.Chatted:Connect(function(message)
-    -- Split message into command and arguments
+    -- Parse the message to get the command and arguments
     local args = message:split(" ")
-    local command = table.remove(args, 1):lower()  -- Get the command (first word) and remove it from the args
+    local command = table.remove(args, 1):lower()  -- Get the first word as command and remove it from arguments
 
-    -- Execute the command if valid
-    executeCommand(command, args)
+    if command == "/fly" then
+        toggleFly()
+    elseif command == "/noclip" then
+        toggleNoClip()
+    elseif command == "/spawn" then
+        spawnItem(table.concat(args, " "))
+    elseif command == "/kick" then
+        kickPlayer(table.concat(args, " "))
+    elseif command == "/announce" then
+        sendAnnouncement(table.concat(args, " "))
+    elseif command == "/scriptinfo" then
+        showScriptInfo()
+    else
+        print("Unknown command: " .. command)
+    end
 end)
 
--- ===================== End of Script =====================
+-- =================== End of Script ===================
