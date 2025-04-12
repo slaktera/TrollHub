@@ -10,7 +10,7 @@ gui.Name = "TrollHub"
 gui.Parent = playerGui
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Main frame with better visual design and a solo-leveling background
+-- Main frame with better visual design
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 350, 0, 500) -- Adjusted for a better size
 mainFrame.Position = UDim2.new(0.5, -175, 0.5, -250) -- Centered on screen
@@ -28,11 +28,11 @@ titleLabel.TextSize = 20
 titleLabel.TextAlign = Enum.TextXAlignment.Center
 titleLabel.Parent = mainFrame
 
--- Background Image (Solo Leveling)
+-- Background Image (Generic Cool Background)
 local backgroundImage = Instance.new("ImageLabel")
 backgroundImage.Size = UDim2.new(1, 0, 1, 0)
 backgroundImage.BackgroundTransparency = 1
-backgroundImage.Image = "https://example.com/solo_leveling_image.jpg" -- Replace with actual image URL
+backgroundImage.Image = "https://www.w3schools.com/w3images/mountains.jpg" -- Cool placeholder background image
 backgroundImage.Parent = mainFrame
 
 -- Draggable GUI
