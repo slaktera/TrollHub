@@ -110,63 +110,8 @@ if executorCheck then
     godmodeButton.TextSize = 18
     godmodeButton.Parent = frame
 
-    -- Spawn TextBox for entering commands
-    local spawnTextBox = Instance.new("TextBox")
-    spawnTextBox.Size = UDim2.new(0, 380, 0, 40)
-    spawnTextBox.Position = UDim2.new(0, 10, 0, 210)
-    spawnTextBox.Text = "/spawn (Item Name)"
-    spawnTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    spawnTextBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    spawnTextBox.TextSize = 18
-    spawnTextBox.Parent = frame
-
-    -- Function to handle spawning items (e.g., guns)
-    local function spawnItem(itemName)
-        local tool = game.ReplicatedStorage:FindFirstChild(itemName) or game.Workspace:FindFirstChild(itemName)
-        if tool then
-            local clonedItem = tool:Clone()
-            clonedItem.Parent = game.Players.LocalPlayer.Backpack
-        else
-            warn("Item not found: " .. itemName)
-        end
-    end
-
-    -- Handle the "/spawn" command
-    spawnTextBox.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            local command = spawnTextBox.Text
-            if command:sub(1, 7) == "/spawn" then
-                local itemName = command:sub(8)
-                -- Call the spawnItem function to spawn the weapon
-                spawnItem(itemName)  -- Spawn the item
-            end
-        end
-    end)
-
-    -- Fake System Announcement (Troll your friends)
-    local function fakeAnnouncement(message)
-        local systemMessage = Instance.new("Message")
-        systemMessage.Text = message
-        systemMessage.Parent = game:GetService("CoreGui")
-        wait(5)
-        systemMessage:Destroy()
-    end
-
-    -- Add fake announcement button
-    local announcementButton = Instance.new("TextButton")
-    announcementButton.Size = UDim2.new(0, 380, 0, 40)
-    announcementButton.Position = UDim2.new(0, 10, 0, 260)
-    announcementButton.Text = "Fake Announcement"
-    announcementButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    announcementButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    announcementButton.TextSize = 18
-    announcementButton.Parent = frame
-
-    announcementButton.MouseButton1Click:Connect(function()
-        fakeAnnouncement("System Update: Roblox will be undergoing maintenance soon. Please wait.")
-    end)
-
     -- Fly functionality
+    local flySpeed = 50  -- Default fly speed
     local isFlying = false
     local humanoid = game.Players.LocalPlayer.Character:WaitForChild("Humanoid")
     local bodyVelocity = Instance.new("BodyVelocity")
@@ -177,7 +122,7 @@ if executorCheck then
     flyButton.MouseButton1Click:Connect(function()
         isFlying = not isFlying
         if isFlying then
-            bodyVelocity.Velocity = Vector3.new(0, 50, 0)  -- Going up
+            bodyVelocity.Velocity = Vector3.new(0, flySpeed, 0)  -- Going up
         else
             bodyVelocity.Velocity = Vector3.new(0, 0, 0)  -- Stop flying
         end
@@ -208,6 +153,45 @@ if executorCheck then
             local humanoid = character.Humanoid
             humanoid.MaxHealth = math.huge
             humanoid.Health = humanoid.MaxHealth
+        end
+    end)
+
+    -- Fake System Announcement (Troll your friends)
+    local function fakeAnnouncement(message)
+        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(message, "All")
+    end
+
+    -- Add fake announcement button
+    local announcementButton = Instance.new("TextButton")
+    announcementButton.Size = UDim2.new(0, 380, 0, 40)
+    announcementButton.Position = UDim2.new(0, 10, 0, 210)
+    announcementButton.Text = "Fake Announcement"
+    announcementButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    announcementButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    announcementButton.TextSize = 18
+    announcementButton.Parent = frame
+
+    announcementButton.MouseButton1Click:Connect(function()
+        fakeAnnouncement("System Update: Roblox will be undergoing maintenance soon. Please wait.")
+    end)
+
+    -- Function to handle spawning items (e.g., guns)
+    local function spawnItem(itemName)
+        local tool = game.ReplicatedStorage:FindFirstChild(itemName) or game.Workspace:FindFirstChild(itemName)
+        if tool then
+            local clonedItem = tool:Clone()
+            clonedItem.Parent = game.Players.LocalPlayer.Backpack
+        else
+            warn("Item not found: " .. itemName)
+        end
+    end
+
+    -- Listen to the chat for spawn commands
+    game.Players.LocalPlayer.Chatted:Connect(function(message)
+        if message:sub(1, 6) == "/spawn" then
+            local itemName = message:sub(8)
+            -- Call the spawnItem function to spawn the weapon
+            spawnItem(itemName)
         end
     end)
 
