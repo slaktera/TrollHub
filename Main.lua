@@ -1,29 +1,29 @@
--- ============================ Menu Script ============================
+-- ======================== Main Script ========================
 
+-- Create GUI for menu
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- Create the main menu GUI
 local gui = Instance.new("ScreenGui")
-gui.Name = "TrollHubMenu"
+gui.Name = "InfiniteYieldMenu"
 gui.Parent = playerGui
 
--- Create the menu frame (smaller size)
+-- Menu Frame
 local menu = Instance.new("Frame")
-menu.Name = "Menu"
-menu.Size = UDim2.new(0, 300, 0, 400)
-menu.Position = UDim2.new(0.5, -150, 0.5, -200)
-menu.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-menu.BackgroundTransparency = 0.7
+menu.Size = UDim2.new(0, 350, 0, 400)
+menu.Position = UDim2.new(0.5, -175, 0.5, -200)
+menu.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+menu.BorderSizePixel = 0
 menu.Parent = gui
 
--- Title of the menu
+-- Menu Title
 local title = Instance.new("TextLabel")
-title.Text = "TrollHub Menu"
+title.Text = "Infinite Yield Menu"
 title.Size = UDim2.new(1, 0, 0, 30)
-title.BackgroundTransparency = 1
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextSize = 20
+title.BackgroundTransparency = 1
 title.Parent = menu
 
 -- Close Button
@@ -40,29 +40,27 @@ closeButton.MouseButton1Click:Connect(function()
     gui:Destroy()  -- Close the menu
 end)
 
--- ==================== Command Bar ====================
+-- ===================== Command Bar =====================
 
--- Command input box
 local commandInput = Instance.new("TextBox")
 commandInput.Size = UDim2.new(1, -20, 0, 30)
 commandInput.Position = UDim2.new(0, 10, 0, 350)
-commandInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+commandInput.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 commandInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-commandInput.PlaceholderText = "/command here"
+commandInput.PlaceholderText = "/command"
 commandInput.TextSize = 16
 commandInput.Parent = menu
 
--- Text Label for Command Suggestions
-local commandSuggestions = Instance.new("TextLabel")
-commandSuggestions.Size = UDim2.new(1, -20, 0, 50)
-commandSuggestions.Position = UDim2.new(0, 10, 0, 380)
-commandSuggestions.BackgroundTransparency = 1
-commandSuggestions.TextColor3 = Color3.fromRGB(255, 255, 255)
-commandSuggestions.TextSize = 16
-commandSuggestions.Text = "Available commands: /fly, /noclip, /spawn (item), /kick (player), /announce (message)"
-commandSuggestions.Parent = menu
+local suggestionsLabel = Instance.new("TextLabel")
+suggestionsLabel.Size = UDim2.new(1, -20, 0, 50)
+suggestionsLabel.Position = UDim2.new(0, 10, 0, 380)
+suggestionsLabel.BackgroundTransparency = 1
+suggestionsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+suggestionsLabel.TextSize = 16
+suggestionsLabel.Text = "Available commands: /fly, /noclip, /spawn (item), /kick (player), /announce (message)"
+suggestionsLabel.Parent = menu
 
--- ==================== Command Handling ====================
+-- ===================== Command Handling =====================
 
 game.Players.LocalPlayer.Chatted:Connect(function(message)
     local args = string.split(message, " ")
@@ -78,30 +76,17 @@ game.Players.LocalPlayer.Chatted:Connect(function(message)
     elseif command == "/kick" and param then
         kickPlayer(param)
     elseif command == "/announce" then
-        local announcementMessage = table.concat(args, " ", 2)  -- Get the message part after /announce
+        local announcementMessage = table.concat(args, " ", 2)  -- Get message after /announce
         sendRealAnnouncement(announcementMessage)
     elseif command == "/scriptinfo" then
-        -- Display all commands and usage info
-        local infoMessage = [[
-            Commands:
-
-            /fly - Toggles flying mode.
-            /noclip - Toggles no-clip mode.
-            /spawn (itemName) - Spawns an item (e.g., "Sword", "Gun").
-            /kick (playerName) - Kicks a player from the game.
-            /announce (message) - Sends an announcement message to all players.
-        ]]
-        
-        sendRealAnnouncement(infoMessage)  -- Sends the info to all players
+        showScriptInfo()
     end
 end)
 
--- ==================== Fly Script ====================
+-- ===================== Fly Script =====================
 
 local flying = false
-local speed = 50
-local bodyVelocity
-local bodyGyro
+local bodyVelocity, bodyGyro
 
 function toggleFly()
     if flying then
@@ -124,7 +109,7 @@ function toggleFly()
     end
 end
 
--- ==================== NoClip Script ====================
+-- ===================== NoClip Script =====================
 
 local noclip = false
 
@@ -142,7 +127,7 @@ function toggleNoClip()
     end
 end
 
--- ==================== Spawn Item Script ====================
+-- ===================== Spawn Item Script =====================
 
 function spawnItem(itemName)
     local item = game.ReplicatedStorage:FindFirstChild(itemName) or game.ServerStorage:FindFirstChild(itemName)
@@ -155,7 +140,7 @@ function spawnItem(itemName)
     end
 end
 
--- ==================== Kick Player Script ====================
+-- ===================== Kick Player Script =====================
 
 function kickPlayer(playerName)
     local player = game.Players:FindFirstChild(playerName)
@@ -166,20 +151,41 @@ function kickPlayer(playerName)
     end
 end
 
--- ==================== Real Announcements ====================
+-- ===================== Real Announcements =====================
 
 function sendRealAnnouncement(message)
     game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(message, "All")
 end
 
--- ==================== Command Bar ====================
+-- ===================== ScriptInfo =====================
 
--- Command input box
+function showScriptInfo()
+    local infoMessage = [[
+        Available Commands:
+        
+        /fly - Toggles flying mode.
+        /noclip - Toggles no-clip mode.
+        /spawn (itemName) - Spawns an item (e.g., /spawn Sword).
+        /kick (playerName) - Kicks a player from the server (e.g., /kick PlayerName).
+        /announce (message) - Sends an announcement message to all players.
+    ]]
+    
+    sendRealAnnouncement(infoMessage)  -- Sends the info to all players
+end
+
+-- ===================== Command Suggestions =====================
+
 commandInput.FocusLost:Connect(function()
     local inputText = commandInput.Text
     if inputText ~= "" then
         game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(inputText, "All")
     end
     commandInput.Text = ""  -- Clear the input after use
+end)
+
+-- ===================== Menu Close =====================
+
+closeButton.MouseButton1Click:Connect(function()
+    gui:Destroy()  -- Close the menu
 end)
 
