@@ -1,30 +1,29 @@
--- ======================== Main Script ========================
+-- Main Script: All Commands Integrated in GUI
 
--- Create GUI for menu
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Create the main menu GUI
+-- Menu Setup
 local gui = Instance.new("ScreenGui")
 gui.Name = "TrollHubMenu"
 gui.Parent = playerGui
 
 -- Menu Frame
 local menu = Instance.new("Frame")
-menu.Size = UDim2.new(0, 350, 0, 300)
-menu.Position = UDim2.new(0.5, -175, 0.5, -150)
+menu.Size = UDim2.new(0, 350, 0, 450)
+menu.Position = UDim2.new(0.5, -175, 0.5, -225)
 menu.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 menu.BorderSizePixel = 0
 menu.Parent = gui
 
--- Add Solo Leveling logo as background
+-- Solo Leveling Logo Background (Replace with valid asset ID for Solo Leveling Logo)
 local logo = Instance.new("ImageLabel")
-logo.Image = "rbxassetid://YourImageID" -- Replace with the actual asset ID for Solo Leveling logo
-logo.Size = UDim2.new(1, 0, 1, 0)
+logo.Image = "rbxassetid://YourSoloLevelingImageID"  -- Replace with actual Image ID
+logo.Size = UDim2.new(1, 0, 0.3, 0)
 logo.BackgroundTransparency = 1
 logo.Parent = menu
 
--- Menu Title
+-- Title of Menu
 local title = Instance.new("TextLabel")
 title.Text = "TrollHub"
 title.Size = UDim2.new(1, 0, 0, 30)
@@ -47,83 +46,25 @@ closeButton.MouseButton1Click:Connect(function()
     gui:Destroy()  -- Close the menu
 end)
 
--- ===================== Command Bar =====================
+-- Command Buttons
+local function createCommandButton(commandName, position, callback)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(1, -20, 0, 40)
+    button.Position = position
+    button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 16
+    button.Text = commandName
+    button.Parent = menu
 
-local commandInput = Instance.new("TextBox")
-commandInput.Size = UDim2.new(1, -20, 0, 30)
-commandInput.Position = UDim2.new(0, 10, 0, 250)
-commandInput.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-commandInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-commandInput.PlaceholderText = "/command"
-commandInput.TextSize = 16
-commandInput.Parent = menu
+    button.MouseButton1Click:Connect(callback)
+end
 
--- ===================== Command Suggestions =====================
-
-local suggestionsLabel = Instance.new("TextLabel")
-suggestionsLabel.Size = UDim2.new(1, -20, 0, 50)
-suggestionsLabel.Position = UDim2.new(0, 10, 0, 280)
-suggestionsLabel.BackgroundTransparency = 1
-suggestionsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-suggestionsLabel.TextSize = 16
-suggestionsLabel.Text = "Available commands will appear here..."
-suggestionsLabel.Parent = menu
-
--- ===================== Dragging the Menu =====================
-
-local dragging = false
-local dragInput, dragStart, startPos
-
-menu.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = menu.Position
-    end
-end)
-
-menu.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        menu.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
-menu.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
--- ===================== Command Handling =====================
-
-game.Players.LocalPlayer.Chatted:Connect(function(message)
-    local args = string.split(message, " ")
-    local command = args[1]
-    local param = args[2]
-
-    if command == "/fly" then
-        toggleFly(param)
-    elseif command == "/noclip" then
-        toggleNoClip()
-    elseif command == "/spawn" and param then
-        spawnItem(param)
-    elseif command == "/kick" and param then
-        kickPlayer(param)
-    elseif command == "/announce" then
-        local announcementMessage = table.concat(args, " ", 2)  -- Get message after /announce
-        sendRealAnnouncement(announcementMessage)
-    elseif command == "/scriptinfo" then
-        showScriptInfo()
-    end
-end)
-
--- ===================== Fly Script =====================
-
+-- Fly Command
 local flying = false
 local bodyVelocity, bodyGyro
 
-function toggleFly(speed)
+function toggleFly()
     if flying then
         flying = false
         if bodyVelocity then bodyVelocity:Destroy() end
@@ -134,7 +75,7 @@ function toggleFly(speed)
         bodyGyro = Instance.new("BodyGyro")
         
         bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
-        bodyVelocity.Velocity = Vector3.new(0, speed or 50, 0)  -- Use speed parameter
+        bodyVelocity.Velocity = Vector3.new(0, 50, 0)  -- Default speed
         bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
         bodyGyro.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
         
@@ -143,8 +84,7 @@ function toggleFly(speed)
     end
 end
 
--- ===================== NoClip Script =====================
-
+-- NoClip Command
 local noclip = false
 
 function toggleNoClip()
@@ -161,8 +101,7 @@ function toggleNoClip()
     end
 end
 
--- ===================== Spawn Item Script =====================
-
+-- Spawn Item Command
 function spawnItem(itemName)
     local item = game.ReplicatedStorage:FindFirstChild(itemName) or game.ServerStorage:FindFirstChild(itemName)
 
@@ -174,8 +113,7 @@ function spawnItem(itemName)
     end
 end
 
--- ===================== Kick Player Script =====================
-
+-- Kick Player Command
 function kickPlayer(playerName)
     local player = game.Players:FindFirstChild(playerName)
     if player then
@@ -185,40 +123,49 @@ function kickPlayer(playerName)
     end
 end
 
--- ===================== Real Announcements =====================
-
-function sendRealAnnouncement(message)
+-- Announcement Command
+function sendAnnouncement(message)
     game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(message, "All")
 end
 
--- ===================== ScriptInfo =====================
-
+-- Script Info Command
 function showScriptInfo()
     local infoMessage = [[
         Available Commands:
         
-        /fly (speed) - Toggles flying mode with optional speed (e.g., /fly 50).
+        /fly - Toggles flying mode.
         /noclip - Toggles no-clip mode.
         /spawn (itemName) - Spawns an item (e.g., /spawn Sword).
         /kick (playerName) - Kicks a player from the server (e.g., /kick PlayerName).
         /announce (message) - Sends an announcement message to all players.
     ]]
     
-    sendRealAnnouncement(infoMessage)  -- Sends the info to all players
+    sendAnnouncement(infoMessage)  -- Sends the info to all players
 end
 
--- ===================== Command Suggestions =====================
+-- Command Buttons in the Menu
+createCommandButton("/fly", UDim2.new(0, 10, 0, 40), toggleFly)
+createCommandButton("/noclip", UDim2.new(0, 10, 0, 80), toggleNoClip)
 
-commandInput.FocusLost:Connect(function()
-    local inputText = commandInput.Text
-    if inputText ~= "" then
-        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(inputText, "All")
-    end
-    commandInput.Text = ""  -- Clear the input after use
+-- Spawn Button (Prompts for Item Name)
+createCommandButton("/spawn (itemName)", UDim2.new(0, 10, 0, 120), function()
+    local itemName = "Sword"  -- You can change this with any default item or prompt for user input
+    spawnItem(itemName)
 end)
 
--- ===================== Menu Close =====================
-
-closeButton.MouseButton1Click:Connect(function()
-    gui:Destroy()  -- Close the menu
+-- Kick Button (Prompts for Player Name)
+createCommandButton("/kick (playerName)", UDim2.new(0, 10, 0, 160), function()
+    local playerName = "PlayerName"  -- You can change this to the player you want to kick or prompt for input
+    kickPlayer(playerName)
 end)
+
+-- Announcement Button
+createCommandButton("/announce", UDim2.new(0, 10, 0, 200), function()
+    local announcementMessage = "This is a test announcement."
+    sendAnnouncement(announcementMessage)
+end)
+
+-- Info Button
+createCommandButton("/scriptinfo", UDim2.new(0, 10, 0, 240), showScriptInfo)
+
+-- ===================== End of Script =====================
