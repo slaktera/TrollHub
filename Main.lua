@@ -23,15 +23,15 @@ if executorCheck then
     background.BackgroundTransparency = 1
     background.Parent = frame
 
-    -- Create the logo using an ImageLabel (Optional, can replace with another image)
+    -- Create the logo using an ImageLabel (Solo Leveling logo)
     local logo = Instance.new("ImageLabel")
     logo.Size = UDim2.new(0, 400, 0, 50) -- Adjust the size of your logo
     logo.Position = UDim2.new(0, 0, 0, 0)
-    logo.Image = "https://i.imgur.com/xX5pVvn.png"  -- Solo Leveling logo image (or other logo)
+    logo.Image = "https://i.imgur.com/xX5pVvn.png"  -- Solo Leveling logo image
     logo.BackgroundTransparency = 1
     logo.Parent = frame
 
-    -- Add title to the menu (can be removed if logo is enough)
+    -- Add title to the menu (optional, can replace with another image)
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Size = UDim2.new(0, 400, 0, 50)
     titleLabel.Position = UDim2.new(0, 0, 0, 50)
@@ -218,20 +218,14 @@ if executorCheck then
         local character = game.Players.LocalPlayer.Character
         if character and character:FindFirstChild("Humanoid") then
             local humanoid = character.Humanoid
-            humanoid.Health = godMode and math.huge or humanoid.Health
+            humanoid.MaxHealth = godMode and math.huge or 100
+            humanoid.Health = humanoid.Health
+            humanoid.HealthChanged:Connect(function()
+                if godMode then
+                    humanoid.Health = humanoid.MaxHealth
+                end
+            end)
             updateLog(godMode and "Godmode Enabled" or "Godmode Disabled")
-        end
-    end)
-
-    -- Spawn Command Mechanism
-    spawnTextBox.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            local command = spawnTextBox.Text
-            if command:sub(1, 7) == "/spawn" then
-                local itemName = command:sub(8)
-                -- Handle item spawning
-                updateLog("Spawning: " .. itemName)  -- Update log
-            end
         end
     end)
 
