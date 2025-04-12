@@ -11,7 +11,7 @@ gui.Parent = playerGui
 -- Create the menu frame
 local menu = Instance.new("Frame")
 menu.Name = "Menu"
-menu.Size = UDim2.new(0, 400, 0, 550)
+menu.Size = UDim2.new(0, 400, 0, 500)
 menu.Position = UDim2.new(0.5, -200, 0.5, -250)
 menu.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 menu.BackgroundTransparency = 0.7
@@ -38,6 +38,62 @@ closeButton.Parent = menu
 
 closeButton.MouseButton1Click:Connect(function()
     gui:Destroy()  -- Close the menu
+end)
+
+-- ==================== Command Bar ====================
+
+-- Command input box
+local commandInput = Instance.new("TextBox")
+commandInput.Size = UDim2.new(1, -20, 0, 50)
+commandInput.Position = UDim2.new(0, 10, 0, 450)
+commandInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+commandInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+commandInput.PlaceholderText = "/command here"
+commandInput.TextSize = 18
+commandInput.Parent = menu
+
+-- Text Label for Command Suggestions
+local commandSuggestions = Instance.new("TextLabel")
+commandSuggestions.Size = UDim2.new(1, -20, 0, 50)
+commandSuggestions.Position = UDim2.new(0, 10, 0, 500)
+commandSuggestions.BackgroundTransparency = 1
+commandSuggestions.TextColor3 = Color3.fromRGB(255, 255, 255)
+commandSuggestions.TextSize = 18
+commandSuggestions.Text = "Available commands: /fly, /noclip, /spawn (item), /kick (player), /announce (message)"
+commandSuggestions.Parent = menu
+
+-- ==================== Command Handling ====================
+
+game.Players.LocalPlayer.Chatted:Connect(function(message)
+    local args = string.split(message, " ")
+    local command = args[1]
+    local param = args[2]
+
+    if command == "/fly" then
+        toggleFly()
+    elseif command == "/noclip" then
+        toggleNoClip()
+    elseif command == "/spawn" and param then
+        spawnItem(param)
+    elseif command == "/kick" and param then
+        kickPlayer(param)
+    elseif command == "/announce" then
+        local announcementMessage = table.concat(args, " ", 2)  -- Get the message part after /announce
+        sendRealAnnouncement(announcementMessage)
+    elseif command == "/scriptinfo" then
+        -- Display all commands and usage info
+        local infoMessage = [[
+            Commands:
+
+            /fly - Toggles flying mode.
+            /noclip - Toggles no-clip mode.
+            /spawn (itemName) - Spawns an item (e.g., "Sword", "Gun").
+            /kick (playerName) - Kicks a player from the game.
+            /announce (message) - Sends an announcement message to all players.
+        ]]
+        
+        sendRealAnnouncement(infoMessage)  -- Sends the info to all players
+    end
 end)
 
 -- ==================== Fly Script ====================
@@ -116,129 +172,14 @@ function sendRealAnnouncement(message)
     game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(message, "All")
 end
 
--- ==================== Command Handling ====================
-
-game.Players.LocalPlayer.Chatted:Connect(function(message)
-    local args = string.split(message, " ")
-    local command = args[1]
-    local param = args[2]
-
-    if command == "/fly" then
-        toggleFly()
-    elseif command == "/noclip" then
-        toggleNoClip()
-    elseif command == "/spawn" and param then
-        spawnItem(param)
-    elseif command == "/kick" and param then
-        kickPlayer(param)
-    elseif command == "/announce" then
-        local announcementMessage = table.concat(args, " ", 2)  -- Get the message part after /announce
-        sendRealAnnouncement(announcementMessage)
-    elseif command == "/scriptinfo" then
-        -- Display all commands and usage info
-        local infoMessage = [[
-            Commands:
-
-            /fly - Toggles flying mode.
-            /noclip - Toggles no-clip mode.
-            /spawn (itemName) - Spawns an item (e.g., "Sword", "Gun").
-            /kick (playerName) - Kicks a player from the game.
-            /announce (message) - Sends an announcement message to all players.
-        ]]
-        
-        sendRealAnnouncement(infoMessage)  -- Sends the info to all players
-    end
-end)
-
 -- ==================== Command Bar ====================
 
 -- Command input box
-local commandInput = Instance.new("TextBox")
-commandInput.Size = UDim2.new(1, -20, 0, 50)
-commandInput.Position = UDim2.new(0, 10, 0, 450)
-commandInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-commandInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-commandInput.PlaceholderText = "/command here"
-commandInput.TextSize = 18
-commandInput.Parent = menu
-
 commandInput.FocusLost:Connect(function()
     local inputText = commandInput.Text
     if inputText ~= "" then
         game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(inputText, "All")
     end
     commandInput.Text = ""  -- Clear the input after use
-end)
-
--- ==================== Menu Buttons ====================
-
--- Button to toggle Fly
-local flyButton = Instance.new("TextButton")
-flyButton.Text = "Toggle Fly"
-flyButton.Size = UDim2.new(0, 380, 0, 50)
-flyButton.Position = UDim2.new(0, 10, 0, 60)
-flyButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-flyButton.TextSize = 18
-flyButton.Parent = menu
-
-flyButton.MouseButton1Click:Connect(function()
-    toggleFly()
-end)
-
--- Button to toggle NoClip
-local noclipButton = Instance.new("TextButton")
-noclipButton.Text = "Toggle NoClip"
-noclipButton.Size = UDim2.new(0, 380, 0, 50)
-noclipButton.Position = UDim2.new(0, 10, 0, 120)
-noclipButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-noclipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-noclipButton.TextSize = 18
-noclipButton.Parent = menu
-
-noclipButton.MouseButton1Click:Connect(function()
-    toggleNoClip()
-end)
-
--- Button to spawn an item (e.g., a weapon)
-local spawnButton = Instance.new("TextButton")
-spawnButton.Text = "Spawn Weapon"
-spawnButton.Size = UDim2.new(0, 380, 0, 50)
-spawnButton.Position = UDim2.new(0, 10, 0, 180)
-spawnButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-spawnButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-spawnButton.TextSize = 18
-spawnButton.Parent = menu
-
-spawnButton.MouseButton1Click:Connect(function()
-    spawnItem("Sword")  -- Change "Sword" to the name of the item you want to spawn
-end)
-
--- Button to kick a player
-local kickButton = Instance.new("TextButton")
-kickButton.Text = "Kick Player"
-kickButton.Size = UDim2.new(0, 380, 0, 50)
-kickButton.Position = UDim2.new(0, 10, 0, 240)
-kickButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-kickButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-kickButton.TextSize = 18
-kickButton.Parent = menu
-
-kickButton.MouseButton1Click:Connect(function()
-    kickPlayer("PlayerName")  -- Replace with the name of the player you want to kick
-end)
-
--- Button to send a real announcement
-local announceButton = Instance.new("TextButton")
-announceButton.Text = "Send Real Announcement"
-announceButton.Size = UDim2.new(0, 380, 0, 50)
-announceButton.Position = UDim2.new(0, 10, 0, 300)
-announceButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-announceButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-announceButton.TextSize = 18
-announceButton.Parent = menu
-
-announceButton.MouseButton1Click:Connect(function()
-    sendRealAnnouncement("System Update: Roblox is shutting down!")  -- Fake announcement message
 end)
 
