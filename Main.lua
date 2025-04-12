@@ -1,62 +1,50 @@
--- === AI NPC Creation ===
-local npc = Instance.new("Model")
-npc.Name = "AI_NPC"
-npc.Parent = workspace
+-- ============================ Menu Script ============================
 
--- Creating parts for the NPC
-local head = Instance.new("Part")
-head.Name = "Head"
-head.Size = Vector3.new(2, 2, 2)
-head.Position = Vector3.new(0, 5, 0)
-head.Anchored = true
-head.Parent = npc
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
-local body = Instance.new("Part")
-body.Name = "Body"
-body.Size = Vector3.new(2, 3, 1)
-body.Position = Vector3.new(0, 3, 0)
-body.Anchored = true
-body.Parent = npc
+-- Create the main menu GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "TrollHubMenu"
+gui.Parent = playerGui
 
--- Creating a simple humanoid for NPC
-local humanoid = Instance.new("Humanoid")
-humanoid.Parent = npc
+-- Create the menu frame
+local menu = Instance.new("Frame")
+menu.Name = "Menu"
+menu.Size = UDim2.new(0, 400, 0, 550)
+menu.Position = UDim2.new(0.5, -200, 0.5, -250)
+menu.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+menu.BackgroundTransparency = 0.7
+menu.Parent = gui
 
--- Simple AI behavior: Follow the player
-local targetPlayer = game.Players.LocalPlayer
-local aiSpeed = 10
+-- Title of the menu
+local title = Instance.new("TextLabel")
+title.Text = "TrollHub Menu"
+title.Size = UDim2.new(1, 0, 0, 50)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 24
+title.Parent = menu
 
--- AI follows the player
-local function followPlayer()
-    while true do
-        wait(0.1)
-        local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-        local direction = (targetPosition - npc.HumanoidRootPart.Position).unit
-        npc.HumanoidRootPart.CFrame = npc.HumanoidRootPart.CFrame + direction * aiSpeed
-    end
-end
+-- Close Button
+local closeButton = Instance.new("TextButton")
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 50, 0, 50)
+closeButton.Position = UDim2.new(1, -50, 0, 0)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.TextSize = 24
+closeButton.Parent = menu
 
--- Function to communicate with the player (AI sending messages)
-local function communicateWithPlayer()
-    wait(5)
-    while true do
-        local message = "Hello, " .. targetPlayer.Name .. "! I'm an AI NPC."
-        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(message, "All")
-        wait(10)
-    end
-end
+closeButton.MouseButton1Click:Connect(function()
+    gui:Destroy()  -- Close the menu
+end)
 
--- Start the AI behavior
-spawn(followPlayer)
-spawn(communicateWithPlayer)
+-- ==================== Fly Script ====================
 
--- === Fly Script (Infinite Yield Style) ===
 local flying = false
 local speed = 50
 local bodyVelocity
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local bodyGyro
 
 function toggleFly()
@@ -73,23 +61,15 @@ function toggleFly()
         bodyVelocity.Velocity = Vector3.new(0, 0, 0)
         
         bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
-        bodyGyro.CFrame = humanoidRootPart.CFrame
+        bodyGyro.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
         
-        bodyVelocity.Parent = humanoidRootPart
-        bodyGyro.Parent = humanoidRootPart
+        bodyVelocity.Parent = game.Players.LocalPlayer.Character.HumanoidRootPart
+        bodyGyro.Parent = game.Players.LocalPlayer.Character.HumanoidRootPart
     end
 end
 
-game.Players.LocalPlayer.Chatted:Connect(function(message)
-    local args = string.split(message, " ")
-    local command = args[1]
-    
-    if command == "/fly" then
-        toggleFly()
-    end
-end)
+-- ==================== NoClip Script ====================
 
--- === NoClip Script (Infinite Yield Style) ===
 local noclip = false
 
 function toggleNoClip()
@@ -106,39 +86,21 @@ function toggleNoClip()
     end
 end
 
-game.Players.LocalPlayer.Chatted:Connect(function(message)
-    local args = string.split(message, " ")
-    local command = args[1]
-    
-    if command == "/noclip" then
-        toggleNoClip()
-    end
-end)
+-- ==================== Spawn Item Script ====================
 
--- === Spawn Item Script ===
 function spawnItem(itemName)
-    local player = game.Players.LocalPlayer
     local item = game.ReplicatedStorage:FindFirstChild(itemName) or game.ServerStorage:FindFirstChild(itemName)
 
     if item then
         local clonedItem = item:Clone()
-        clonedItem.Parent = player.Backpack
+        clonedItem.Parent = game.Players.LocalPlayer.Backpack
     else
         warn("Item not found!")
     end
 end
 
-game.Players.LocalPlayer.Chatted:Connect(function(message)
-    local args = string.split(message, " ")
-    local command = args[1]
-    local param = args[2]
-    
-    if command == "/spawn" and param then
-        spawnItem(param)
-    end
-end)
+-- ==================== Kick Player Script ====================
 
--- === Kick Player Script ===
 function kickPlayer(playerName)
     local player = game.Players:FindFirstChild(playerName)
     if player then
@@ -148,97 +110,67 @@ function kickPlayer(playerName)
     end
 end
 
-game.Players.LocalPlayer.Chatted:Connect(function(message)
-    local args = string.split(message, " ")
-    local command = args[1]
-    local param = args[2]
-    
-    if command == "/kick" and param then
-        kickPlayer(param)
-    end
-end)
+-- ==================== Real Announcements ====================
 
--- === Real Announcements ===
 function sendRealAnnouncement(message)
     game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(message, "All")
 end
 
+-- ==================== Command Handling ====================
+
 game.Players.LocalPlayer.Chatted:Connect(function(message)
     local args = string.split(message, " ")
     local command = args[1]
-    
-    if command == "/announce" then
+    local param = args[2]
+
+    if command == "/fly" then
+        toggleFly()
+    elseif command == "/noclip" then
+        toggleNoClip()
+    elseif command == "/spawn" and param then
+        spawnItem(param)
+    elseif command == "/kick" and param then
+        kickPlayer(param)
+    elseif command == "/announce" then
         local announcementMessage = table.concat(args, " ", 2)  -- Get the message part after /announce
         sendRealAnnouncement(announcementMessage)
+    elseif command == "/scriptinfo" then
+        -- Display all commands and usage info
+        local infoMessage = [[
+            Commands:
+
+            /fly - Toggles flying mode.
+            /noclip - Toggles no-clip mode.
+            /spawn (itemName) - Spawns an item (e.g., "Sword", "Gun").
+            /kick (playerName) - Kicks a player from the game.
+            /announce (message) - Sends an announcement message to all players.
+        ]]
+        
+        sendRealAnnouncement(infoMessage)  -- Sends the info to all players
     end
 end)
 
--- === Script Info ===
-function scriptInfo()
-    return [[
-    This script includes the following commands:
-    
-    /fly - Toggles flying mode.
-    /noclip - Toggles no-clip mode.
-    /spawn [itemName] - Spawns an item (e.g., /spawn Sword).
-    /kick [playerName] - Kicks a player from the server (e.g., /kick PlayerName).
-    /announce [message] - Sends a message to all players as an announcement.
-    /viewplayers - View all players' usernames in the server.
-    ]]
-end
+-- ==================== Command Bar ====================
 
-game.Players.LocalPlayer.Chatted:Connect(function(message)
-    local args = string.split(message, " ")
-    local command = args[1]
-    
-    if command == "/scriptinfo" then
-        print(scriptInfo())
+-- Command input box
+local commandInput = Instance.new("TextBox")
+commandInput.Size = UDim2.new(1, -20, 0, 50)
+commandInput.Position = UDim2.new(0, 10, 0, 450)
+commandInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+commandInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+commandInput.PlaceholderText = "/command here"
+commandInput.TextSize = 18
+commandInput.Parent = menu
+
+commandInput.FocusLost:Connect(function()
+    local inputText = commandInput.Text
+    if inputText ~= "" then
+        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(inputText, "All")
     end
+    commandInput.Text = ""  -- Clear the input after use
 end)
 
--- === GUI Menu Script ===
-local gui = Instance.new("ScreenGui")
-gui.Name = "TrollHubMenu"
-gui.Parent = game.Players.LocalPlayer.PlayerGui
-
-local menu = Instance.new("Frame")
-menu.Name = "Menu"
-menu.Size = UDim2.new(0, 400, 0, 400)
-menu.Position = UDim2.new(0.5, -200, 0.5, -200)
-menu.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-menu.BackgroundTransparency = 0.5
-menu.Parent = gui
-
--- Add a Title Label
-local title = Instance.new("TextLabel")
-title.Text = "TrollHub Menu"
-title.Size = UDim2.new(1, 0, 0, 50)
-title.BackgroundTransparency = 1
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 24
-title.Parent = menu
-
--- Function for dragging the menu
-local dragStartPos, startPos
-local function onDrag(input)
-    local delta = input.Position - dragStartPos
-    menu.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-end
-
-local function onDragEnd()
-    game:GetService("UserInputService").InputChanged:Disconnect(onDrag)
-end
-
-local function onDragStart(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragStartPos = input.Position
-        startPos = menu.Position
-        game:GetService("UserInputService").InputChanged:Connect(onDrag)
-    end
-end
-
-menu.InputBegan:Connect(onDragStart)
-menu.InputEnded:Connect(onDragEnd)
+-- ==================== Menu Buttons ====================
 
 -- Button to toggle Fly
 local flyButton = Instance.new("TextButton")
@@ -247,6 +179,7 @@ flyButton.Size = UDim2.new(0, 380, 0, 50)
 flyButton.Position = UDim2.new(0, 10, 0, 60)
 flyButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyButton.TextSize = 18
 flyButton.Parent = menu
 
 flyButton.MouseButton1Click:Connect(function()
@@ -260,6 +193,7 @@ noclipButton.Size = UDim2.new(0, 380, 0, 50)
 noclipButton.Position = UDim2.new(0, 10, 0, 120)
 noclipButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 noclipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+noclipButton.TextSize = 18
 noclipButton.Parent = menu
 
 noclipButton.MouseButton1Click:Connect(function()
@@ -273,6 +207,7 @@ spawnButton.Size = UDim2.new(0, 380, 0, 50)
 spawnButton.Position = UDim2.new(0, 10, 0, 180)
 spawnButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 spawnButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+spawnButton.TextSize = 18
 spawnButton.Parent = menu
 
 spawnButton.MouseButton1Click:Connect(function()
@@ -286,6 +221,7 @@ kickButton.Size = UDim2.new(0, 380, 0, 50)
 kickButton.Position = UDim2.new(0, 10, 0, 240)
 kickButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 kickButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+kickButton.TextSize = 18
 kickButton.Parent = menu
 
 kickButton.MouseButton1Click:Connect(function()
@@ -299,8 +235,10 @@ announceButton.Size = UDim2.new(0, 380, 0, 50)
 announceButton.Position = UDim2.new(0, 10, 0, 300)
 announceButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 announceButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+announceButton.TextSize = 18
 announceButton.Parent = menu
 
 announceButton.MouseButton1Click:Connect(function()
     sendRealAnnouncement("System Update: Roblox is shutting down!")  -- Fake announcement message
 end)
+
