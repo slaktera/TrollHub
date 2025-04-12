@@ -1,5 +1,4 @@
--- =================== Main Script ===================
-
+-- Main Script Setup
 local player = game.Players.LocalPlayer
 local userInputService = game:GetService("UserInputService")
 local playerGui = player:WaitForChild("PlayerGui")
@@ -11,13 +10,15 @@ gui.Name = "TrollHub"
 gui.Parent = playerGui
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
+-- Main frame with better visual design and a solo-leveling background
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 350, 0, 500) -- Increased size for better visibility
-mainFrame.Position = UDim2.new(0, 100, 0, 100)
+mainFrame.Size = UDim2.new(0, 350, 0, 500) -- Adjusted for a better size
+mainFrame.Position = UDim2.new(0.5, -175, 0.5, -250) -- Centered on screen
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 mainFrame.BackgroundTransparency = 0.2
 mainFrame.Parent = gui
 
+-- Title Label
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(0, 350, 0, 50)
 titleLabel.BackgroundTransparency = 1
@@ -27,10 +28,16 @@ titleLabel.TextSize = 20
 titleLabel.TextAlign = Enum.TextXAlignment.Center
 titleLabel.Parent = mainFrame
 
--- Draggable GUI Setup
-local dragStart
-local startPos
+-- Background Image (Solo Leveling)
+local backgroundImage = Instance.new("ImageLabel")
+backgroundImage.Size = UDim2.new(1, 0, 1, 0)
+backgroundImage.BackgroundTransparency = 1
+backgroundImage.Image = "https://example.com/solo_leveling_image.jpg" -- Replace with actual image URL
+backgroundImage.Parent = mainFrame
+
+-- Draggable GUI
 local dragging = false
+local dragStart, startPos
 
 titleLabel.MouseButton1Down:Connect(function(input)
     dragging = true
@@ -52,10 +59,12 @@ userInputService.InputEnded:Connect(function(input)
 end)
 
 -- Command Functions
+
 local flying = false
 local noclip = false
 local bodyVelocity, bodyGyro
 
+-- Toggle flying mode
 function toggleFly()
     if flying then
         flying = false
@@ -67,7 +76,7 @@ function toggleFly()
         bodyGyro = Instance.new("BodyGyro")
         
         bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
-        bodyVelocity.Velocity = Vector3.new(0, 50, 0)  -- Default speed
+        bodyVelocity.Velocity = Vector3.new(0, 50, 0)
         bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
         bodyGyro.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
         
@@ -76,6 +85,7 @@ function toggleFly()
     end
 end
 
+-- Toggle no-clip mode
 function toggleNoClip()
     noclip = not noclip
     local character = game.Players.LocalPlayer.Character
@@ -90,6 +100,7 @@ function toggleNoClip()
     end
 end
 
+-- Spawn item from game
 function spawnItem(itemName)
     local item = game.ReplicatedStorage:FindFirstChild(itemName) or game.ServerStorage:FindFirstChild(itemName)
 
@@ -101,6 +112,7 @@ function spawnItem(itemName)
     end
 end
 
+-- Kick player
 function kickPlayer(playerName)
     local player = game.Players:FindFirstChild(playerName)
     if player then
@@ -110,10 +122,12 @@ function kickPlayer(playerName)
     end
 end
 
+-- Send announcement
 function sendAnnouncement(message)
     game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(message, "All")
 end
 
+-- Show script info
 function showScriptInfo()
     local infoMessage = [[
         Available Commands:
@@ -131,9 +145,8 @@ end
 
 -- Command Listener
 game.Players.LocalPlayer.Chatted:Connect(function(message)
-    -- Parse the message to get the command and arguments
     local args = message:split(" ")
-    local command = table.remove(args, 1):lower()  -- Get the first word as command and remove it from arguments
+    local command = table.remove(args, 1):lower()
 
     if command == "/fly" then
         toggleFly()
