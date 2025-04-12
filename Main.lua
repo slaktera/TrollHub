@@ -12,14 +12,14 @@ gui.Parent = playerGui
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 300, 0, 400)
+mainFrame.Size = UDim2.new(0, 350, 0, 500) -- Increased size for better visibility
 mainFrame.Position = UDim2.new(0, 100, 0, 100)
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-mainFrame.BackgroundTransparency = 0.5
+mainFrame.BackgroundTransparency = 0.2
 mainFrame.Parent = gui
 
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(0, 300, 0, 50)
+titleLabel.Size = UDim2.new(0, 350, 0, 50)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text = "TrollHub - Commands"
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
