@@ -19,7 +19,7 @@ if executorCheck then
     local background = Instance.new("ImageLabel")
     background.Size = UDim2.new(1, 0, 1, 0) -- Fill the entire frame
     background.Position = UDim2.new(0, 0, 0, 0)
-    background.Image = "https://i.imgur.com/3Pf2z7u.jpg"  -- Solo Leveling background image
+    background.Image = "https://i.imgur.com/LjNdyNJ.png"  -- Solo Leveling background image (fixed)
     background.BackgroundTransparency = 1
     background.Parent = frame
 
@@ -31,7 +31,7 @@ if executorCheck then
     logo.BackgroundTransparency = 1
     logo.Parent = frame
 
-    -- Add title to the menu (optional, can replace with another image)
+    -- Add title to the menu
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Size = UDim2.new(0, 400, 0, 50)
     titleLabel.Position = UDim2.new(0, 0, 0, 50)
@@ -131,22 +131,6 @@ if executorCheck then
         end
     end
 
-    -- Button click handlers
-    flyButton.MouseButton1Click:Connect(function()
-        -- Toggle fly (for example, activate the fly mode here)
-        -- Add flying code here as needed
-    end)
-
-    noclipButton.MouseButton1Click:Connect(function()
-        -- Toggle noclip (for example, set CanCollide to false for the player)
-        -- Add noclip code here as needed
-    end)
-
-    godmodeButton.MouseButton1Click:Connect(function()
-        -- Toggle godmode (set health to max or infinite)
-        -- Add godmode code here as needed
-    end)
-
     -- Handle the "/spawn" command
     spawnTextBox.FocusLost:Connect(function(enterPressed)
         if enterPressed then
@@ -156,6 +140,74 @@ if executorCheck then
                 -- Call the spawnItem function to spawn the weapon
                 spawnItem(itemName)  -- Spawn the item
             end
+        end
+    end)
+
+    -- Fake System Announcement (Troll your friends)
+    local function fakeAnnouncement(message)
+        local systemMessage = Instance.new("Message")
+        systemMessage.Text = message
+        systemMessage.Parent = game:GetService("CoreGui")
+        wait(5)
+        systemMessage:Destroy()
+    end
+
+    -- Add fake announcement button
+    local announcementButton = Instance.new("TextButton")
+    announcementButton.Size = UDim2.new(0, 380, 0, 40)
+    announcementButton.Position = UDim2.new(0, 10, 0, 260)
+    announcementButton.Text = "Fake Announcement"
+    announcementButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    announcementButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    announcementButton.TextSize = 18
+    announcementButton.Parent = frame
+
+    announcementButton.MouseButton1Click:Connect(function()
+        fakeAnnouncement("System Update: Roblox will be undergoing maintenance soon. Please wait.")
+    end)
+
+    -- Fly functionality
+    local isFlying = false
+    local humanoid = game.Players.LocalPlayer.Character:WaitForChild("Humanoid")
+    local bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.Parent = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+
+    flyButton.MouseButton1Click:Connect(function()
+        isFlying = not isFlying
+        if isFlying then
+            bodyVelocity.Velocity = Vector3.new(0, 50, 0)  -- Going up
+        else
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)  -- Stop flying
+        end
+    end)
+
+    -- Noclip functionality
+    local function toggleNoclip()
+        local character = game.Players.LocalPlayer.Character
+        local humanoid = character:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.PlatformStand = not humanoid.PlatformStand
+            for _, part in pairs(character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = not part.CanCollide
+                end
+            end
+        end
+    end
+
+    noclipButton.MouseButton1Click:Connect(function()
+        toggleNoclip()
+    end)
+
+    -- Godmode functionality
+    godmodeButton.MouseButton1Click:Connect(function()
+        local character = game.Players.LocalPlayer.Character
+        if character and character:FindFirstChild("Humanoid") then
+            local humanoid = character.Humanoid
+            humanoid.MaxHealth = math.huge
+            humanoid.Health = humanoid.MaxHealth
         end
     end)
 
