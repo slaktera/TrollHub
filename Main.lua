@@ -1,186 +1,225 @@
--- Check if we are running in an executor environment
-local executorCheck = pcall(function() return game:GetService("CoreGui") end)
+-- === Fly Script ===
+local flying = false
+local speed = 50
+local bodyVelocity
+local player = game.Players.LocalPlayer
+local character = player.Character
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
-if executorCheck then
-    -- Create the main ScreenGui for the menu
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "TrollHubMenu"
-    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
-    -- Create the main frame for the menu
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 400, 0, 600)
-    frame.Position = UDim2.new(0.5, -200, 0.5, -300) -- Centering the menu
-    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    frame.BorderSizePixel = 0
-    frame.Parent = screenGui
-
-    -- Add Solo Leveling background image
-    local background = Instance.new("ImageLabel")
-    background.Size = UDim2.new(1, 0, 1, 0) -- Fill the entire frame
-    background.Position = UDim2.new(0, 0, 0, 0)
-    background.Image = "https://i.imgur.com/LjNdyNJ.png"  -- Solo Leveling background image
-    background.BackgroundTransparency = 1
-    background.Parent = frame
-
-    -- Create the logo using an ImageLabel (Solo Leveling logo)
-    local logo = Instance.new("ImageLabel")
-    logo.Size = UDim2.new(0, 400, 0, 50) -- Adjust the size of your logo
-    logo.Position = UDim2.new(0, 0, 0, 0)
-    logo.Image = "https://i.imgur.com/xX5pVvn.png"  -- Solo Leveling logo image
-    logo.BackgroundTransparency = 1
-    logo.Parent = frame
-
-    -- Add title to the menu
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(0, 400, 0, 50)
-    titleLabel.Position = UDim2.new(0, 0, 0, 50)
-    titleLabel.Text = "TrollHub"
-    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    titleLabel.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    titleLabel.TextSize = 25
-    titleLabel.TextStrokeTransparency = 0.8
-    titleLabel.TextStrokeColor3 = Color3.fromRGB(0, 255, 255)
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Center
-    titleLabel.Parent = frame
-
-    -- Close button
-    local closeButton = Instance.new("TextButton")
-    closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(0, 370, 0, 10)
-    closeButton.Text = "X"
-    closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    closeButton.TextSize = 18
-    closeButton.Parent = frame
-    closeButton.MouseButton1Click:Connect(function()
-        screenGui:Destroy()  -- Close the menu when clicked
-    end)
-
-    -- Make the frame draggable
-    local dragging = false
-    local dragInput, mousePos, framePos
-    frame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragInput = input
-            mousePos = input.Position
-            framePos = frame.Position
-        end
-    end)
-
-    frame.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
-            local delta = input.Position - mousePos
-            frame.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
-        end
-    end)
-
-    frame.InputEnded:Connect(function(input)
-        if input == dragInput then
-            dragging = false
-        end
-    end)
-
-    -- Buttons for features
-    local flyButton = Instance.new("TextButton")
-    flyButton.Size = UDim2.new(0, 380, 0, 40)
-    flyButton.Position = UDim2.new(0, 10, 0, 60)
-    flyButton.Text = "Toggle Fly (WASD to control)"
-    flyButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    flyButton.TextSize = 18
-    flyButton.Parent = frame
-
-    local noclipButton = Instance.new("TextButton")
-    noclipButton.Size = UDim2.new(0, 380, 0, 40)
-    noclipButton.Position = UDim2.new(0, 10, 0, 110)
-    noclipButton.Text = "Toggle Noclip"
-    noclipButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    noclipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    noclipButton.TextSize = 18
-    noclipButton.Parent = frame
-
-    local godmodeButton = Instance.new("TextButton")
-    godmodeButton.Size = UDim2.new(0, 380, 0, 40)
-    godmodeButton.Position = UDim2.new(0, 10, 0, 160)
-    godmodeButton.Text = "Toggle Godmode"
-    godmodeButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    godmodeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    godmodeButton.TextSize = 18
-    godmodeButton.Parent = frame
-
-    -- Fly functionality
-    local flySpeed = 50  -- Default fly speed
-    local isFlying = false
-    local humanoid = game.Players.LocalPlayer.Character:WaitForChild("Humanoid")
-    local bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
-    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-    bodyVelocity.Parent = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-
-    -- To control the movement
-    local flyDirection = Vector3.new(0, 0, 0)
-    local speed = 10  -- Change this to control speed
-    local upSpeed = 0
-    local rightSpeed = 0
-    local forwardSpeed = 0
-
-    -- Fly logic update
-    local function updateFly()
-        if isFlying then
-            local movement = Vector3.new(forwardSpeed, upSpeed, rightSpeed)
-            bodyVelocity.Velocity = movement * speed
-        else
-            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-        end
+function toggleFly()
+    if flying then
+        flying = false
+        if bodyVelocity then bodyVelocity:Destroy() end
+    else
+        flying = true
+        bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
+        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+        bodyVelocity.Parent = humanoidRootPart
     end
-
-    -- Control fly speed with WASD
-    flyButton.MouseButton1Click:Connect(function()
-        isFlying = not isFlying
-        if isFlying then
-            flyButton.Text = "Flying... (WASD to control)"
-        else
-            flyButton.Text = "Toggle Fly (WASD to control)"
-            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-        end
-    end)
-
-    -- Noclip functionality
-    local function toggleNoclip()
-        local character = game.Players.LocalPlayer.Character
-        local humanoid = character:FindFirstChild("Humanoid")
-        if humanoid then
-            humanoid.PlatformStand = not humanoid.PlatformStand
-            for _, part in pairs(character:GetChildren()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = not part.CanCollide
-                end
-            end
-        end
-    end
-
-    noclipButton.MouseButton1Click:Connect(function()
-        toggleNoclip()
-    end)
-
-    -- Godmode functionality
-    godmodeButton.MouseButton1Click:Connect(function()
-        local character = game.Players.LocalPlayer.Character
-        if character and character:FindFirstChild("Humanoid") then
-            local humanoid = character.Humanoid
-            humanoid.MaxHealth = math.huge
-            humanoid.Health = humanoid.MaxHealth
-        end
-    end)
-
-    -- Listen to the chat for spawn commands
-    game.Players.LocalPlayer.Chatted:Connect(function(message)
-        if message:sub(1, 6) == "/spawn" then
-            local itemName = message:sub(8)
-            -- Call the spawnItem function to spawn the item
-            spawnItem(itemName)
-        end
-    end)
 end
+
+game.Players.LocalPlayer.Chatted:Connect(function(message)
+    local args = string.split(message, " ")
+    local command = args[1]
+    local param = args[2]
+
+    if command == "/fly" then
+        toggleFly()
+    end
+end)
+
+-- === NoClip Script ===
+local noclip = false
+
+function toggleNoClip()
+    noclip = not noclip
+    local character = game.Players.LocalPlayer.Character
+    if noclip then
+        character.Humanoid.PlatformStand = true
+        character.HumanoidRootPart.CanCollide = false
+    else
+        character.Humanoid.PlatformStand = false
+        character.HumanoidRootPart.CanCollide = true
+    end
+end
+
+game.Players.LocalPlayer.Chatted:Connect(function(message)
+    local args = string.split(message, " ")
+    local command = args[1]
+    
+    if command == "/noclip" then
+        toggleNoClip()
+    end
+end)
+
+-- === Spawn Item Script ===
+function spawnItem(itemName)
+    local player = game.Players.LocalPlayer
+    local item = game.ReplicatedStorage:FindFirstChild(itemName) or game.ServerStorage:FindFirstChild(itemName)
+
+    if item then
+        local clonedItem = item:Clone()
+        clonedItem.Parent = player.Backpack
+    else
+        warn("Item not found!")
+    end
+end
+
+game.Players.LocalPlayer.Chatted:Connect(function(message)
+    local args = string.split(message, " ")
+    local command = args[1]
+    local param = args[2]
+    
+    if command == "/spawn" and param then
+        spawnItem(param)
+    end
+end)
+
+-- === Kick Player Script ===
+function kickPlayer(playerName)
+    local player = game.Players:FindFirstChild(playerName)
+    if player then
+        player:Kick("You have been kicked from the server.")
+    else
+        warn("Player not found!")
+    end
+end
+
+game.Players.LocalPlayer.Chatted:Connect(function(message)
+    local args = string.split(message, " ")
+    local command = args[1]
+    local param = args[2]
+    
+    if command == "/kick" and param then
+        kickPlayer(param)
+    end
+end)
+
+-- === GUI Menu Script ===
+local gui = Instance.new("ScreenGui")
+gui.Name = "TrollHubMenu"
+gui.Parent = game.Players.LocalPlayer.PlayerGui
+
+local menu = Instance.new("Frame")
+menu.Name = "Menu"
+menu.Size = UDim2.new(0, 400, 0, 400)
+menu.Position = UDim2.new(0.5, -200, 0.5, -200)
+menu.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+menu.BackgroundTransparency = 0.5
+menu.Parent = gui
+
+-- Add a Title Label
+local title = Instance.new("TextLabel")
+title.Text = "TrollHub Menu"
+title.Size = UDim2.new(1, 0, 0, 50)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 24
+title.Parent = menu
+
+-- Function for dragging the menu
+local dragStartPos, startPos
+local function onDrag(input)
+    local delta = input.Position - dragStartPos
+    menu.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+local function onDragEnd()
+    game:GetService("UserInputService").InputChanged:Disconnect(onDrag)
+end
+
+local function onDragStart(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragStartPos = input.Position
+        startPos = menu.Position
+        game:GetService("UserInputService").InputChanged:Connect(onDrag)
+    end
+end
+
+menu.InputBegan:Connect(onDragStart)
+menu.InputEnded:Connect(onDragEnd)
+
+-- Button to toggle Fly
+local flyButton = Instance.new("TextButton")
+flyButton.Text = "Toggle Fly"
+flyButton.Size = UDim2.new(0, 380, 0, 50)
+flyButton.Position = UDim2.new(0, 10, 0, 60)
+flyButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyButton.Parent = menu
+
+flyButton.MouseButton1Click:Connect(function()
+    toggleFly()
+end)
+
+-- Button to toggle NoClip
+local noclipButton = Instance.new("TextButton")
+noclipButton.Text = "Toggle NoClip"
+noclipButton.Size = UDim2.new(0, 380, 0, 50)
+noclipButton.Position = UDim2.new(0, 10, 0, 120)
+noclipButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+noclipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+noclipButton.Parent = menu
+
+noclipButton.MouseButton1Click:Connect(function()
+    toggleNoClip()
+end)
+
+-- Button to spawn an item (e.g., a weapon)
+local spawnButton = Instance.new("TextButton")
+spawnButton.Text = "Spawn Weapon"
+spawnButton.Size = UDim2.new(0, 380, 0, 50)
+spawnButton.Position = UDim2.new(0, 10, 0, 180)
+spawnButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+spawnButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+spawnButton.Parent = menu
+
+spawnButton.MouseButton1Click:Connect(function()
+    spawnItem("Sword")  -- Change "Sword" to the name of the item you want to spawn
+end)
+
+-- Button to kick a player
+local kickButton = Instance.new("TextButton")
+kickButton.Text = "Kick Player"
+kickButton.Size = UDim2.new(0, 380, 0, 50)
+kickButton.Position = UDim2.new(0, 10, 0, 240)
+kickButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+kickButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+kickButton.Parent = menu
+
+kickButton.MouseButton1Click:Connect(function()
+    kickPlayer("PlayerName")  -- Replace with the name of the player you want to kick
+end)
+
+-- === Announcements (Fake Roblox System Announcements) ===
+function sendFakeAnnouncement(message)
+    game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(message, "All")
+end
+
+-- Example of a fake announcement button
+local announceButton = Instance.new("TextButton")
+announceButton.Text = "Fake Announcement"
+announceButton.Size = UDim2.new(0, 380, 0, 50)
+announceButton.Position = UDim2.new(0, 10, 0, 300)
+announceButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+announceButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+announceButton.Parent = menu
+
+announceButton.MouseButton1Click:Connect(function()
+    sendFakeAnnouncement("System Update: Roblox is shutting down!")  -- Fake announcement message
+end)
+
+-- === Script Execution ===
+game.Players.LocalPlayer.Chatted:Connect(function(message)
+    local args = string.split(message, " ")
+    local command = args[1]
+    local param = args[2]
+
+    if command == "/spawn" then
+        spawnItem(param)
+    end
+    if command == "/kick" then
+        kickPlayer(param)
+    end
+end)
