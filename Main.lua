@@ -1,46 +1,56 @@
--- === Fly Script ===
+-- === Fly Script (Infinite Yield Style) ===
 local flying = false
 local speed = 50
 local bodyVelocity
 local player = game.Players.LocalPlayer
-local character = player.Character
+local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local bodyGyro
 
 function toggleFly()
     if flying then
         flying = false
         if bodyVelocity then bodyVelocity:Destroy() end
+        if bodyGyro then bodyGyro:Destroy() end
     else
         flying = true
         bodyVelocity = Instance.new("BodyVelocity")
+        bodyGyro = Instance.new("BodyGyro")
+        
         bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
         bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+        
+        bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+        bodyGyro.CFrame = humanoidRootPart.CFrame
+        
         bodyVelocity.Parent = humanoidRootPart
+        bodyGyro.Parent = humanoidRootPart
     end
 end
 
 game.Players.LocalPlayer.Chatted:Connect(function(message)
     local args = string.split(message, " ")
     local command = args[1]
-    local param = args[2]
-
+    
     if command == "/fly" then
         toggleFly()
     end
 end)
 
--- === NoClip Script ===
+-- === NoClip Script (Infinite Yield Style) ===
 local noclip = false
 
 function toggleNoClip()
     noclip = not noclip
     local character = game.Players.LocalPlayer.Character
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    
     if noclip then
         character.Humanoid.PlatformStand = true
-        character.HumanoidRootPart.CanCollide = false
+        humanoidRootPart.CanCollide = false
     else
         character.Humanoid.PlatformStand = false
-        character.HumanoidRootPart.CanCollide = true
+        humanoidRootPart.CanCollide = true
     end
 end
 
@@ -93,6 +103,63 @@ game.Players.LocalPlayer.Chatted:Connect(function(message)
     
     if command == "/kick" and param then
         kickPlayer(param)
+    end
+end)
+
+-- === Real Announcements ===
+function sendRealAnnouncement(message)
+    game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(message, "All")
+end
+
+game.Players.LocalPlayer.Chatted:Connect(function(message)
+    local args = string.split(message, " ")
+    local command = args[1]
+    
+    if command == "/announce" then
+        local announcementMessage = table.concat(args, " ", 2)  -- Get the message part after /announce
+        sendRealAnnouncement(announcementMessage)
+    end
+end)
+
+-- === View Players' Usernames (IP info not possible in Roblox) ===
+function viewPlayerUsernames()
+    local playerNames = {}
+    for _, plr in pairs(game.Players:GetPlayers()) do
+        table.insert(playerNames, plr.Name)
+    end
+    return table.concat(playerNames, ", ")
+end
+
+game.Players.LocalPlayer.Chatted:Connect(function(message)
+    local args = string.split(message, " ")
+    local command = args[1]
+    
+    if command == "/viewplayers" then
+        local playerNames = viewPlayerUsernames()
+        print("Players in the server: " .. playerNames)
+    end
+end)
+
+-- === Script Info ===
+function scriptInfo()
+    return [[
+    This script includes the following commands:
+    
+    /fly - Toggles flying mode.
+    /noclip - Toggles no-clip mode.
+    /spawn [itemName] - Spawns an item (e.g., /spawn Sword).
+    /kick [playerName] - Kicks a player from the server (e.g., /kick PlayerName).
+    /announce [message] - Sends a message to all players as an announcement.
+    /viewplayers - View all players' usernames in the server.
+    ]]
+end
+
+game.Players.LocalPlayer.Chatted:Connect(function(message)
+    local args = string.split(message, " ")
+    local command = args[1]
+    
+    if command == "/scriptinfo" then
+        print(scriptInfo())
     end
 end)
 
@@ -192,14 +259,9 @@ kickButton.MouseButton1Click:Connect(function()
     kickPlayer("PlayerName")  -- Replace with the name of the player you want to kick
 end)
 
--- === Announcements (Fake Roblox System Announcements) ===
-function sendFakeAnnouncement(message)
-    game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(message, "All")
-end
-
--- Example of a fake announcement button
+-- Button to send a real announcement
 local announceButton = Instance.new("TextButton")
-announceButton.Text = "Fake Announcement"
+announceButton.Text = "Send Real Announcement"
 announceButton.Size = UDim2.new(0, 380, 0, 50)
 announceButton.Position = UDim2.new(0, 10, 0, 300)
 announceButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
@@ -207,7 +269,7 @@ announceButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 announceButton.Parent = menu
 
 announceButton.MouseButton1Click:Connect(function()
-    sendFakeAnnouncement("System Update: Roblox is shutting down!")  -- Fake announcement message
+    sendRealAnnouncement("System Update: Roblox is shutting down!")  -- Fake announcement message
 end)
 
 -- === Script Execution ===
@@ -221,5 +283,8 @@ game.Players.LocalPlayer.Chatted:Connect(function(message)
     end
     if command == "/kick" then
         kickPlayer(param)
+    end
+    if command == "/scriptinfo" then
+        print(scriptInfo())
     end
 end)
