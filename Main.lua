@@ -9,14 +9,14 @@ if executorCheck then
 
     -- Create the main frame for the menu
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 200, 0, 300)
+    frame.Size = UDim2.new(0, 250, 0, 400)
     frame.Position = UDim2.new(0, 10, 0, 10)
     frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     frame.Parent = screenGui
 
     -- Add title to the menu
     local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(0, 200, 0, 40)
+    titleLabel.Size = UDim2.new(0, 250, 0, 40)
     titleLabel.Position = UDim2.new(0, 0, 0, 0)
     titleLabel.Text = "TrollHub Menu"
     titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -26,7 +26,7 @@ if executorCheck then
     -- Create the close button
     local closeButton = Instance.new("TextButton")
     closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(0, 170, 0, 10)
+    closeButton.Position = UDim2.new(0, 220, 0, 10)
     closeButton.Text = "X"
     closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -62,7 +62,7 @@ if executorCheck then
 
     -- Create buttons for features like Fly, Noclip, Godmode
     local flyButton = Instance.new("TextButton")
-    flyButton.Size = UDim2.new(0, 200, 0, 40)
+    flyButton.Size = UDim2.new(0, 250, 0, 40)
     flyButton.Position = UDim2.new(0, 0, 0, 50)
     flyButton.Text = "Toggle Fly"
     flyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
@@ -70,7 +70,7 @@ if executorCheck then
     flyButton.Parent = frame
 
     local noclipButton = Instance.new("TextButton")
-    noclipButton.Size = UDim2.new(0, 200, 0, 40)
+    noclipButton.Size = UDim2.new(0, 250, 0, 40)
     noclipButton.Position = UDim2.new(0, 0, 0, 100)
     noclipButton.Text = "Toggle Noclip"
     noclipButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
@@ -78,7 +78,7 @@ if executorCheck then
     noclipButton.Parent = frame
 
     local godmodeButton = Instance.new("TextButton")
-    godmodeButton.Size = UDim2.new(0, 200, 0, 40)
+    godmodeButton.Size = UDim2.new(0, 250, 0, 40)
     godmodeButton.Position = UDim2.new(0, 0, 0, 150)
     godmodeButton.Text = "Toggle Godmode"
     godmodeButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
@@ -87,7 +87,7 @@ if executorCheck then
 
     -- TextBox for spawn command
     local spawnTextBox = Instance.new("TextBox")
-    spawnTextBox.Size = UDim2.new(0, 200, 0, 40)
+    spawnTextBox.Size = UDim2.new(0, 250, 0, 40)
     spawnTextBox.Position = UDim2.new(0, 0, 0, 200)
     spawnTextBox.Text = "/spawn (Item Name)"
     spawnTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
