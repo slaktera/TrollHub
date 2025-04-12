@@ -6,7 +6,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 
 -- Create the main menu GUI
 local gui = Instance.new("ScreenGui")
-gui.Name = "InfiniteYieldMenu"
+gui.Name = "TrollHubMenu"
 gui.Parent = playerGui
 
 -- Menu Frame
@@ -17,9 +17,16 @@ menu.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 menu.BorderSizePixel = 0
 menu.Parent = gui
 
+-- Add Solo Leveling logo as background
+local logo = Instance.new("ImageLabel")
+logo.Image = "rbxassetid://YourImageID" -- Replace with the actual asset ID for Solo Leveling logo
+logo.Size = UDim2.new(1, 0, 1, 0)
+logo.BackgroundTransparency = 1
+logo.Parent = menu
+
 -- Menu Title
 local title = Instance.new("TextLabel")
-title.Text = "Infinite Yield Menu"
+title.Text = "TrollHub"
 title.Size = UDim2.new(1, 0, 0, 30)
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextSize = 20
@@ -51,14 +58,42 @@ commandInput.PlaceholderText = "/command"
 commandInput.TextSize = 16
 commandInput.Parent = menu
 
+-- ===================== Command Suggestions =====================
+
 local suggestionsLabel = Instance.new("TextLabel")
 suggestionsLabel.Size = UDim2.new(1, -20, 0, 50)
 suggestionsLabel.Position = UDim2.new(0, 10, 0, 380)
 suggestionsLabel.BackgroundTransparency = 1
 suggestionsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 suggestionsLabel.TextSize = 16
-suggestionsLabel.Text = "Available commands: /fly, /noclip, /spawn (item), /kick (player), /announce (message)"
+suggestionsLabel.Text = "Available commands will appear here..."
 suggestionsLabel.Parent = menu
+
+-- ===================== Dragging the Menu =====================
+
+local dragging = false
+local dragInput, dragStart, startPos
+
+menu.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = menu.Position
+    end
+end)
+
+menu.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        menu.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+menu.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
 
 -- ===================== Command Handling =====================
 
@@ -188,4 +223,3 @@ end)
 closeButton.MouseButton1Click:Connect(function()
     gui:Destroy()  -- Close the menu
 end)
-
