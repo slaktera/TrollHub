@@ -2,7 +2,6 @@
 local player = game.Players.LocalPlayer
 local userInputService = game:GetService("UserInputService")
 local playerGui = player:WaitForChild("PlayerGui")
-local replicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Set up the GUI for the commands
 local gui = Instance.new("ScreenGui")
@@ -12,10 +11,10 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 -- Main frame with better visual design
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 350, 0, 500) -- Adjusted for a better size
-mainFrame.Position = UDim2.new(0.5, -175, 0.5, -250) -- Centered on screen
+mainFrame.Size = UDim2.new(0, 350, 0, 300) -- Adjusted for a better size
+mainFrame.Position = UDim2.new(0.5, -175, 0.5, -150) -- Centered on screen
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-mainFrame.BackgroundTransparency = 0.2
+mainFrame.BackgroundTransparency = 0.5
 mainFrame.Parent = gui
 
 -- Title Label
@@ -27,13 +26,6 @@ titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleLabel.TextSize = 20
 titleLabel.TextAlign = Enum.TextXAlignment.Center
 titleLabel.Parent = mainFrame
-
--- Background Image (Generic Cool Background)
-local backgroundImage = Instance.new("ImageLabel")
-backgroundImage.Size = UDim2.new(1, 0, 1, 0)
-backgroundImage.BackgroundTransparency = 1
-backgroundImage.Image = "https://www.w3schools.com/w3images/mountains.jpg" -- Cool placeholder background image
-backgroundImage.Parent = mainFrame
 
 -- Draggable GUI
 local dragging = false
