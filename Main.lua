@@ -1,18 +1,41 @@
--- Check if we are in an executor environment
-if pcall(function() return game:GetService("CoreGui") end) then
-    -- Create the GUI menu
+-- Check if we are running in an executor environment
+local executorCheck = pcall(function() return game:GetService("CoreGui") end)
+
+if executorCheck then
+    -- Create the main ScreenGui
     local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "MenuGui"
+    screenGui.Name = "TrollHubMenu"
     screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
-    -- Create a draggable frame
+    -- Create the main frame for the menu
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(0, 200, 0, 300)
     frame.Position = UDim2.new(0, 10, 0, 10)
     frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     frame.Parent = screenGui
 
-    -- Make the menu draggable
+    -- Add title to the menu
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(0, 200, 0, 40)
+    titleLabel.Position = UDim2.new(0, 0, 0, 0)
+    titleLabel.Text = "TrollHub Menu"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    titleLabel.Parent = frame
+
+    -- Create the close button
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0, 30, 0, 30)
+    closeButton.Position = UDim2.new(0, 170, 0, 10)
+    closeButton.Text = "X"
+    closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.Parent = frame
+    closeButton.MouseButton1Click:Connect(function()
+        screenGui:Destroy()  -- Close the menu when clicked
+    end)
+
+    -- Make the frame draggable
     local dragging = false
     local dragInput, mousePos, framePos
     frame.InputBegan:Connect(function(input)
@@ -37,28 +60,7 @@ if pcall(function() return game:GetService("CoreGui") end) then
         end
     end)
 
-    -- Add a close button
-    local closeButton = Instance.new("TextButton")
-    closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(0, 170, 0, 10)
-    closeButton.Text = "X"
-    closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    closeButton.Parent = frame
-    closeButton.MouseButton1Click:Connect(function()
-        screenGui:Destroy()
-    end)
-
-    -- Title Label
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(0, 200, 0, 40)
-    titleLabel.Position = UDim2.new(0, 0, 0, 0)
-    titleLabel.Text = "TrollHub Menu"
-    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    titleLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    titleLabel.Parent = frame
-
-    -- Buttons for each feature
+    -- Create buttons for features like Fly, Noclip, Godmode
     local flyButton = Instance.new("TextButton")
     flyButton.Size = UDim2.new(0, 200, 0, 40)
     flyButton.Position = UDim2.new(0, 0, 0, 50)
@@ -83,6 +85,7 @@ if pcall(function() return game:GetService("CoreGui") end) then
     godmodeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     godmodeButton.Parent = frame
 
+    -- TextBox for spawn command
     local spawnTextBox = Instance.new("TextBox")
     spawnTextBox.Size = UDim2.new(0, 200, 0, 40)
     spawnTextBox.Position = UDim2.new(0, 0, 0, 200)
@@ -91,18 +94,13 @@ if pcall(function() return game:GetService("CoreGui") end) then
     spawnTextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     spawnTextBox.Parent = frame
 
-    -- Variables for features
+    -- Toggle Fly functionality
     local flying = false
-    local noclipping = false
-    local godMode = false
     local bodyGyro, bodyVelocity, humanoidRootPart
-
-    -- Fly logic
     flyButton.MouseButton1Click:Connect(function()
         if not flying then
             flying = true
             humanoidRootPart = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-            
             bodyGyro = Instance.new("BodyGyro")
             bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
             bodyGyro.CFrame = humanoidRootPart.CFrame
@@ -122,7 +120,8 @@ if pcall(function() return game:GetService("CoreGui") end) then
         end
     end)
 
-    -- Noclip logic
+    -- Toggle Noclip functionality
+    local noclipping = false
     noclipButton.MouseButton1Click:Connect(function()
         noclipping = not noclipping
         local character = game.Players.LocalPlayer.Character
@@ -133,7 +132,8 @@ if pcall(function() return game:GetService("CoreGui") end) then
         end
     end)
 
-    -- Godmode logic
+    -- Toggle Godmode functionality
+    local godMode = false
     godmodeButton.MouseButton1Click:Connect(function()
         godMode = not godMode
         local character = game.Players.LocalPlayer.Character
@@ -144,13 +144,13 @@ if pcall(function() return game:GetService("CoreGui") end) then
         end
     end)
 
-    -- Spawn item logic
+    -- Handle item spawning with command
     spawnTextBox.FocusLost:Connect(function(enterPressed)
         if enterPressed then
             local itemName = spawnTextBox.Text:match("/spawn (.+)")
             if itemName then
                 local success, item = pcall(function()
-                    -- Attempt to find the item in the game by name (you may need to modify this logic based on the game you're working with)
+                    -- Attempt to find the item in the game by name
                     local itemToSpawn = game.ReplicatedStorage:FindFirstChild(itemName) or game.Workspace:FindFirstChild(itemName)
                     if itemToSpawn then
                         itemToSpawn:Clone().Parent = game.Players.LocalPlayer.Character
@@ -163,7 +163,7 @@ if pcall(function() return game:GetService("CoreGui") end) then
         end
     end)
 
-    -- Load the TrollHub script from GitHub
+    -- Load the external script from the raw GitHub URL
     local url = "https://raw.githubusercontent.com/slaktera/TrollHub/main/Main.lua"
     local success, result = pcall(function()
         loadstring(game:HttpGet(url))()
