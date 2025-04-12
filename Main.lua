@@ -1,23 +1,23 @@
--- Main Script Setup
+-- Get required services
 local player = game.Players.LocalPlayer
 local userInputService = game:GetService("UserInputService")
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Set up the GUI for the commands
+-- Create the GUI container
 local gui = Instance.new("ScreenGui")
 gui.Name = "TrollHub"
 gui.Parent = playerGui
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Main frame with better visual design
+-- Create the main frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 350, 0, 300) -- Adjusted for a better size
-mainFrame.Position = UDim2.new(0.5, -175, 0.5, -150) -- Centered on screen
+mainFrame.Size = UDim2.new(0, 350, 0, 300) -- Set size of the menu
+mainFrame.Position = UDim2.new(0.5, -175, 0.5, -150) -- Center the menu
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 mainFrame.BackgroundTransparency = 0.5
 mainFrame.Parent = gui
 
--- Title Label
+-- Title of the menu
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(0, 350, 0, 50)
 titleLabel.BackgroundTransparency = 1
@@ -27,7 +27,7 @@ titleLabel.TextSize = 20
 titleLabel.TextAlign = Enum.TextXAlignment.Center
 titleLabel.Parent = mainFrame
 
--- Draggable GUI
+-- Make the menu draggable
 local dragging = false
 local dragStart, startPos
 
@@ -50,8 +50,7 @@ userInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Command Functions
-
+-- Create the command functions
 local flying = false
 local noclip = false
 local bodyVelocity, bodyGyro
@@ -92,7 +91,7 @@ function toggleNoClip()
     end
 end
 
--- Spawn item from game
+-- Spawn item
 function spawnItem(itemName)
     local item = game.ReplicatedStorage:FindFirstChild(itemName) or game.ServerStorage:FindFirstChild(itemName)
 
@@ -114,12 +113,12 @@ function kickPlayer(playerName)
     end
 end
 
--- Send announcement
+-- Send an announcement
 function sendAnnouncement(message)
     game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(message, "All")
 end
 
--- Show script info
+-- Show script information
 function showScriptInfo()
     local infoMessage = [[
         Available Commands:
@@ -157,4 +156,3 @@ game.Players.LocalPlayer.Chatted:Connect(function(message)
     end
 end)
 
--- =================== End of Script ===================
