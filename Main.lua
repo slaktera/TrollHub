@@ -9,10 +9,11 @@ if executorCheck then
 
     -- Create the main frame for the menu
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 300, 0, 450)
-    frame.Position = UDim2.new(0.5, -150, 0.5, -225) -- Centering the menu
-    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    frame.BorderSizePixel = 0
+    frame.Size = UDim2.new(0, 300, 0, 500)
+    frame.Position = UDim2.new(0.5, -150, 0.5, -250) -- Centering the menu
+    frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    frame.BorderSizePixel = 2
+    frame.BorderColor3 = Color3.fromRGB(255, 255, 255)
     frame.Parent = screenGui
 
     -- Add title to the menu
@@ -64,7 +65,7 @@ if executorCheck then
         end
     end)
 
-    -- Create the buttons for features
+    -- Create buttons for various features
     local flyButton = Instance.new("TextButton")
     flyButton.Size = UDim2.new(0, 280, 0, 40)
     flyButton.Position = UDim2.new(0, 10, 0, 50)
@@ -197,17 +198,5 @@ if executorCheck then
         end
     end)
 
-    -- Load the external script from the raw GitHub URL
-    local url = "https://raw.githubusercontent.com/slaktera/TrollHub/main/Main.lua"
-    local success, result = pcall(function()
-        loadstring(game:HttpGet(url))()
-    end)
-
-    if not success then
-        warn("Error loading the script: " .. result)
-    else
-        print("TrollHub script loaded successfully!")
-    end
-else
-    warn("This script can only be executed in an executor.")
+    print("TrollHub Menu Loaded")
 end
