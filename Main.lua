@@ -15,10 +15,26 @@ if executorCheck then
     frame.BorderSizePixel = 0
     frame.Parent = screenGui
 
-    -- Add title to the menu (with a "Solo Leveling" style)
+    -- Add Solo Leveling background image
+    local background = Instance.new("ImageLabel")
+    background.Size = UDim2.new(1, 0, 1, 0) -- Fill the entire frame
+    background.Position = UDim2.new(0, 0, 0, 0)
+    background.Image = "https://i.imgur.com/3Pf2z7u.jpg"  -- Solo Leveling background image
+    background.BackgroundTransparency = 1
+    background.Parent = frame
+
+    -- Create the logo using an ImageLabel (Optional, can replace with another image)
+    local logo = Instance.new("ImageLabel")
+    logo.Size = UDim2.new(0, 400, 0, 50) -- Adjust the size of your logo
+    logo.Position = UDim2.new(0, 0, 0, 0)
+    logo.Image = "https://i.imgur.com/xX5pVvn.png"  -- Solo Leveling logo image (or other logo)
+    logo.BackgroundTransparency = 1
+    logo.Parent = frame
+
+    -- Add title to the menu (can be removed if logo is enough)
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Size = UDim2.new(0, 400, 0, 50)
-    titleLabel.Position = UDim2.new(0, 0, 0, 0)
+    titleLabel.Position = UDim2.new(0, 0, 0, 50)
     titleLabel.Text = "TrollHub"
     titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     titleLabel.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
@@ -28,7 +44,7 @@ if executorCheck then
     titleLabel.TextXAlignment = Enum.TextXAlignment.Center
     titleLabel.Parent = frame
 
-    -- Close button with a Solo Leveling aesthetic
+    -- Close button
     local closeButton = Instance.new("TextButton")
     closeButton.Size = UDim2.new(0, 30, 0, 30)
     closeButton.Position = UDim2.new(0, 370, 0, 10)
@@ -104,6 +120,23 @@ if executorCheck then
     spawnTextBox.TextSize = 18
     spawnTextBox.Parent = frame
 
+    -- Log TextLabel to display actions
+    local logLabel = Instance.new("TextLabel")
+    logLabel.Size = UDim2.new(0, 380, 0, 150)
+    logLabel.Position = UDim2.new(0, 10, 0, 260)
+    logLabel.Text = "Log:\n"
+    logLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    logLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    logLabel.TextSize = 16
+    logLabel.TextYAlignment = Enum.TextYAlignment.Top
+    logLabel.TextWrapped = true
+    logLabel.Parent = frame
+
+    -- Function to update the log
+    local function updateLog(message)
+        logLabel.Text = logLabel.Text .. "\n" .. message
+    end
+
     -- Fly Mechanism
     local flying = false
     local bodyGyro, bodyVelocity, humanoidRootPart
@@ -147,12 +180,12 @@ if executorCheck then
                 end
             end)
 
-            print("Fly Enabled")
+            updateLog("Fly Enabled")
         else
             flying = false
             if bodyGyro then bodyGyro:Destroy() end
             if bodyVelocity then bodyVelocity:Destroy() end
-            print("Fly Disabled")
+            updateLog("Fly Disabled")
         end
     end)
 
@@ -174,7 +207,7 @@ if executorCheck then
                     end
                 end)
             end
-            print(noclipping and "Noclip Enabled" or "Noclip Disabled")
+            updateLog(noclipping and "Noclip Enabled" or "Noclip Disabled")
         end
     end)
 
@@ -186,27 +219,22 @@ if executorCheck then
         if character and character:FindFirstChild("Humanoid") then
             local humanoid = character.Humanoid
             humanoid.Health = godMode and math.huge or humanoid.Health
-            print(godMode and "Godmode Enabled" or "Godmode Disabled")
+            updateLog(godMode and "Godmode Enabled" or "Godmode Disabled")
         end
     end)
 
     -- Spawn Command Mechanism
     spawnTextBox.FocusLost:Connect(function(enterPressed)
         if enterPressed then
-            local itemName = spawnTextBox.Text:match("/spawn (.+)")
-            if itemName then
-                local success, item = pcall(function()
-                    local itemToSpawn = game.ReplicatedStorage:FindFirstChild(itemName) or game.Workspace:FindFirstChild(itemName)
-                    if itemToSpawn then
-                        itemToSpawn:Clone().Parent = game.Players.LocalPlayer.Character
-                    end
-                end)
-                if not success then
-                    warn("Failed to spawn item: " .. itemName)
-                end
+            local command = spawnTextBox.Text
+            if command:sub(1, 7) == "/spawn" then
+                local itemName = command:sub(8)
+                -- Handle item spawning
+                updateLog("Spawning: " .. itemName)  -- Update log
             end
         end
     end)
 
-    print("TrollHub Menu Loaded")
+else
+    warn("This script can only be executed in a script executor environment.")
 end
