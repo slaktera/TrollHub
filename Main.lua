@@ -11,8 +11,8 @@ gui.Parent = playerGui
 
 -- Menu Frame
 local menu = Instance.new("Frame")
-menu.Size = UDim2.new(0, 350, 0, 400)
-menu.Position = UDim2.new(0.5, -175, 0.5, -200)
+menu.Size = UDim2.new(0, 350, 0, 300)
+menu.Position = UDim2.new(0.5, -175, 0.5, -150)
 menu.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 menu.BorderSizePixel = 0
 menu.Parent = gui
@@ -51,7 +51,7 @@ end)
 
 local commandInput = Instance.new("TextBox")
 commandInput.Size = UDim2.new(1, -20, 0, 30)
-commandInput.Position = UDim2.new(0, 10, 0, 350)
+commandInput.Position = UDim2.new(0, 10, 0, 250)
 commandInput.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 commandInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 commandInput.PlaceholderText = "/command"
@@ -62,7 +62,7 @@ commandInput.Parent = menu
 
 local suggestionsLabel = Instance.new("TextLabel")
 suggestionsLabel.Size = UDim2.new(1, -20, 0, 50)
-suggestionsLabel.Position = UDim2.new(0, 10, 0, 380)
+suggestionsLabel.Position = UDim2.new(0, 10, 0, 280)
 suggestionsLabel.BackgroundTransparency = 1
 suggestionsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 suggestionsLabel.TextSize = 16
@@ -103,7 +103,7 @@ game.Players.LocalPlayer.Chatted:Connect(function(message)
     local param = args[2]
 
     if command == "/fly" then
-        toggleFly()
+        toggleFly(param)
     elseif command == "/noclip" then
         toggleNoClip()
     elseif command == "/spawn" and param then
@@ -123,7 +123,7 @@ end)
 local flying = false
 local bodyVelocity, bodyGyro
 
-function toggleFly()
+function toggleFly(speed)
     if flying then
         flying = false
         if bodyVelocity then bodyVelocity:Destroy() end
@@ -134,8 +134,7 @@ function toggleFly()
         bodyGyro = Instance.new("BodyGyro")
         
         bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
-        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-        
+        bodyVelocity.Velocity = Vector3.new(0, speed or 50, 0)  -- Use speed parameter
         bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
         bodyGyro.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
         
@@ -198,7 +197,7 @@ function showScriptInfo()
     local infoMessage = [[
         Available Commands:
         
-        /fly - Toggles flying mode.
+        /fly (speed) - Toggles flying mode with optional speed (e.g., /fly 50).
         /noclip - Toggles no-clip mode.
         /spawn (itemName) - Spawns an item (e.g., /spawn Sword).
         /kick (playerName) - Kicks a player from the server (e.g., /kick PlayerName).
