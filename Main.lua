@@ -8,11 +8,11 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "TrollHubMenu"
 gui.Parent = playerGui
 
--- Create the menu frame
+-- Create the menu frame (smaller size)
 local menu = Instance.new("Frame")
 menu.Name = "Menu"
-menu.Size = UDim2.new(0, 400, 0, 500)
-menu.Position = UDim2.new(0.5, -200, 0.5, -250)
+menu.Size = UDim2.new(0, 300, 0, 400)
+menu.Position = UDim2.new(0.5, -150, 0.5, -200)
 menu.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 menu.BackgroundTransparency = 0.7
 menu.Parent = gui
@@ -20,20 +20,20 @@ menu.Parent = gui
 -- Title of the menu
 local title = Instance.new("TextLabel")
 title.Text = "TrollHub Menu"
-title.Size = UDim2.new(1, 0, 0, 50)
+title.Size = UDim2.new(1, 0, 0, 30)
 title.BackgroundTransparency = 1
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 24
+title.TextSize = 20
 title.Parent = menu
 
 -- Close Button
 local closeButton = Instance.new("TextButton")
 closeButton.Text = "X"
-closeButton.Size = UDim2.new(0, 50, 0, 50)
+closeButton.Size = UDim2.new(0, 50, 0, 30)
 closeButton.Position = UDim2.new(1, -50, 0, 0)
 closeButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeButton.TextSize = 24
+closeButton.TextSize = 20
 closeButton.Parent = menu
 
 closeButton.MouseButton1Click:Connect(function()
@@ -44,21 +44,21 @@ end)
 
 -- Command input box
 local commandInput = Instance.new("TextBox")
-commandInput.Size = UDim2.new(1, -20, 0, 50)
-commandInput.Position = UDim2.new(0, 10, 0, 450)
+commandInput.Size = UDim2.new(1, -20, 0, 30)
+commandInput.Position = UDim2.new(0, 10, 0, 350)
 commandInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 commandInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 commandInput.PlaceholderText = "/command here"
-commandInput.TextSize = 18
+commandInput.TextSize = 16
 commandInput.Parent = menu
 
 -- Text Label for Command Suggestions
 local commandSuggestions = Instance.new("TextLabel")
 commandSuggestions.Size = UDim2.new(1, -20, 0, 50)
-commandSuggestions.Position = UDim2.new(0, 10, 0, 500)
+commandSuggestions.Position = UDim2.new(0, 10, 0, 380)
 commandSuggestions.BackgroundTransparency = 1
 commandSuggestions.TextColor3 = Color3.fromRGB(255, 255, 255)
-commandSuggestions.TextSize = 18
+commandSuggestions.TextSize = 16
 commandSuggestions.Text = "Available commands: /fly, /noclip, /spawn (item), /kick (player), /announce (message)"
 commandSuggestions.Parent = menu
 
