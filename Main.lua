@@ -104,7 +104,7 @@ if executorCheck then
     spawnTextBox.TextSize = 18
     spawnTextBox.Parent = frame
 
-    -- Fly Control
+    -- Fly Mechanism
     local flying = false
     local bodyGyro, bodyVelocity, humanoidRootPart
     local flySpeed = 50
@@ -156,7 +156,7 @@ if executorCheck then
         end
     end)
 
-    -- Noclip
+    -- Noclip Mechanism
     local noclipping = false
     noclipButton.MouseButton1Click:Connect(function()
         noclipping = not noclipping
@@ -164,11 +164,21 @@ if executorCheck then
         local humanoid = character and character:FindFirstChild("Humanoid")
         if humanoid then
             humanoid.PlatformStand = noclipping
+            -- Making the character move through walls by manipulating the CFrame
+            if noclipping then
+                game:GetService("RunService").Heartbeat:Connect(function()
+                    if noclipping then
+                        character.HumanoidRootPart.CanCollide = false
+                    else
+                        character.HumanoidRootPart.CanCollide = true
+                    end
+                end)
+            end
             print(noclipping and "Noclip Enabled" or "Noclip Disabled")
         end
     end)
 
-    -- Godmode
+    -- Godmode Mechanism
     local godMode = false
     godmodeButton.MouseButton1Click:Connect(function()
         godMode = not godMode
@@ -180,7 +190,7 @@ if executorCheck then
         end
     end)
 
-    -- Spawn Command
+    -- Spawn Command Mechanism
     spawnTextBox.FocusLost:Connect(function(enterPressed)
         if enterPressed then
             local itemName = spawnTextBox.Text:match("/spawn (.+)")
