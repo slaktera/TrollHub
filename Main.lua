@@ -110,7 +110,7 @@ if executorCheck then
     godmodeButton.TextSize = 18
     godmodeButton.Parent = frame
 
-    -- Spawn TextBox
+    -- Spawn TextBox for entering commands
     local spawnTextBox = Instance.new("TextBox")
     spawnTextBox.Size = UDim2.new(0, 380, 0, 40)
     spawnTextBox.Position = UDim2.new(0, 10, 0, 210)
@@ -120,112 +120,42 @@ if executorCheck then
     spawnTextBox.TextSize = 18
     spawnTextBox.Parent = frame
 
-    -- Log TextLabel to display actions
-    local logLabel = Instance.new("TextLabel")
-    logLabel.Size = UDim2.new(0, 380, 0, 150)
-    logLabel.Position = UDim2.new(0, 10, 0, 260)
-    logLabel.Text = "Log:\n"
-    logLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    logLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    logLabel.TextSize = 16
-    logLabel.TextYAlignment = Enum.TextYAlignment.Top
-    logLabel.TextWrapped = true
-    logLabel.Parent = frame
-
-    -- Function to update the log
-    local function updateLog(message)
-        logLabel.Text = logLabel.Text .. "\n" .. message
+    -- Function to handle spawning items (e.g., guns)
+    local function spawnItem(itemName)
+        local tool = game.ReplicatedStorage:FindFirstChild(itemName) or game.Workspace:FindFirstChild(itemName)
+        if tool then
+            local clonedItem = tool:Clone()
+            clonedItem.Parent = game.Players.LocalPlayer.Backpack
+        else
+            warn("Item not found: " .. itemName)
+        end
     end
 
-    -- Fly Mechanism
-    local flying = false
-    local bodyGyro, bodyVelocity, humanoidRootPart
-    local flySpeed = 50
-    local controlDirection = Vector3.new(0, 0, 0)
-
+    -- Button click handlers
     flyButton.MouseButton1Click:Connect(function()
-        if not flying then
-            flying = true
-            humanoidRootPart = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-            bodyGyro = Instance.new("BodyGyro")
-            bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
-            bodyGyro.CFrame = humanoidRootPart.CFrame
-            bodyGyro.Parent = humanoidRootPart
-
-            bodyVelocity = Instance.new("BodyVelocity")
-            bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
-            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-            bodyVelocity.Parent = humanoidRootPart
-
-            -- User input for controlling direction
-            local userInputService = game:GetService("UserInputService")
-            userInputService.InputChanged:Connect(function(input)
-                if flying then
-                    if input.UserInputType == Enum.UserInputType.Keyboard then
-                        if input.KeyCode == Enum.KeyCode.W then
-                            controlDirection = Vector3.new(0, 0, -flySpeed)
-                        elseif input.KeyCode == Enum.KeyCode.S then
-                            controlDirection = Vector3.new(0, 0, flySpeed)
-                        elseif input.KeyCode == Enum.KeyCode.A then
-                            controlDirection = Vector3.new(-flySpeed, 0, 0)
-                        elseif input.KeyCode == Enum.KeyCode.D then
-                            controlDirection = Vector3.new(flySpeed, 0, 0)
-                        elseif input.KeyCode == Enum.KeyCode.Space then
-                            controlDirection = Vector3.new(0, flySpeed, 0)
-                        elseif input.KeyCode == Enum.KeyCode.LeftShift then
-                            controlDirection = Vector3.new(0, -flySpeed, 0)
-                        end
-                    end
-                    bodyVelocity.Velocity = controlDirection
-                end
-            end)
-
-            updateLog("Fly Enabled")
-        else
-            flying = false
-            if bodyGyro then bodyGyro:Destroy() end
-            if bodyVelocity then bodyVelocity:Destroy() end
-            updateLog("Fly Disabled")
-        end
+        -- Toggle fly (for example, activate the fly mode here)
+        -- Add flying code here as needed
     end)
 
-    -- Noclip Mechanism
-    local noclipping = false
     noclipButton.MouseButton1Click:Connect(function()
-        noclipping = not noclipping
-        local character = game.Players.LocalPlayer.Character
-        local humanoid = character and character:FindFirstChild("Humanoid")
-        if humanoid then
-            humanoid.PlatformStand = noclipping
-            -- Making the character move through walls by manipulating the CFrame
-            if noclipping then
-                game:GetService("RunService").Heartbeat:Connect(function()
-                    if noclipping then
-                        character.HumanoidRootPart.CanCollide = false
-                    else
-                        character.HumanoidRootPart.CanCollide = true
-                    end
-                end)
-            end
-            updateLog(noclipping and "Noclip Enabled" or "Noclip Disabled")
-        end
+        -- Toggle noclip (for example, set CanCollide to false for the player)
+        -- Add noclip code here as needed
     end)
 
-    -- Godmode Mechanism
-    local godMode = false
     godmodeButton.MouseButton1Click:Connect(function()
-        godMode = not godMode
-        local character = game.Players.LocalPlayer.Character
-        if character and character:FindFirstChild("Humanoid") then
-            local humanoid = character.Humanoid
-            humanoid.MaxHealth = godMode and math.huge or 100
-            humanoid.Health = humanoid.Health
-            humanoid.HealthChanged:Connect(function()
-                if godMode then
-                    humanoid.Health = humanoid.MaxHealth
-                end
-            end)
-            updateLog(godMode and "Godmode Enabled" or "Godmode Disabled")
+        -- Toggle godmode (set health to max or infinite)
+        -- Add godmode code here as needed
+    end)
+
+    -- Handle the "/spawn" command
+    spawnTextBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            local command = spawnTextBox.Text
+            if command:sub(1, 7) == "/spawn" then
+                local itemName = command:sub(8)
+                -- Call the spawnItem function to spawn the weapon
+                spawnItem(itemName)  -- Spawn the item
+            end
         end
     end)
 
