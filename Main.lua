@@ -156,23 +156,23 @@ if executorCheck then
         end
     end)
 
-    -- Fake System Announcement (Troll your friends)
-    local function fakeAnnouncement(message)
+    -- Real System Announcement (to be seen by everyone)
+    local function realAnnouncement(message)
         game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(message, "All")
     end
 
-    -- Add fake announcement button
+    -- Add real announcement button
     local announcementButton = Instance.new("TextButton")
     announcementButton.Size = UDim2.new(0, 380, 0, 40)
     announcementButton.Position = UDim2.new(0, 10, 0, 210)
-    announcementButton.Text = "Fake Announcement"
+    announcementButton.Text = "System Announcement"
     announcementButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     announcementButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     announcementButton.TextSize = 18
     announcementButton.Parent = frame
 
     announcementButton.MouseButton1Click:Connect(function()
-        fakeAnnouncement("System Update: Roblox will be undergoing maintenance soon. Please wait.")
+        realAnnouncement("System Update: Roblox will be undergoing maintenance soon. Please wait.")
     end)
 
     -- Function to handle spawning items (e.g., guns)
@@ -192,6 +192,15 @@ if executorCheck then
             local itemName = message:sub(8)
             -- Call the spawnItem function to spawn the weapon
             spawnItem(itemName)
+        elseif message:sub(1, 5) == "/kick" then
+            local playerName = message:sub(7)
+            -- Kick the player with the specified name
+            local playerToKick = game.Players:FindFirstChild(playerName)
+            if playerToKick then
+                playerToKick:Kick("You have been kicked by a system admin.")
+            else
+                print("Player not found: " .. playerName)
+            end
         end
     end)
 
