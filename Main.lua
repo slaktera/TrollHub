@@ -9,28 +9,29 @@ if executorCheck then
 
     -- Create the main frame for the menu
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 300, 0, 500)
-    frame.Position = UDim2.new(0.5, -150, 0.5, -250) -- Centering the menu
-    frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    frame.BorderSizePixel = 2
-    frame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+    frame.Size = UDim2.new(0, 400, 0, 600)
+    frame.Position = UDim2.new(0.5, -200, 0.5, -300) -- Centering the menu
+    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    frame.BorderSizePixel = 0
     frame.Parent = screenGui
 
-    -- Add title to the menu
+    -- Add title to the menu (with a "Solo Leveling" style)
     local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(0, 300, 0, 40)
+    titleLabel.Size = UDim2.new(0, 400, 0, 50)
     titleLabel.Position = UDim2.new(0, 0, 0, 0)
-    titleLabel.Text = "TrollHub Menu"
+    titleLabel.Text = "TrollHub"
     titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    titleLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    titleLabel.TextSize = 20
+    titleLabel.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    titleLabel.TextSize = 25
+    titleLabel.TextStrokeTransparency = 0.8
+    titleLabel.TextStrokeColor3 = Color3.fromRGB(0, 255, 255)
     titleLabel.TextXAlignment = Enum.TextXAlignment.Center
     titleLabel.Parent = frame
 
-    -- Create the close button
+    -- Close button with a Solo Leveling aesthetic
     local closeButton = Instance.new("TextButton")
     closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(0, 270, 0, 10)
+    closeButton.Position = UDim2.new(0, 370, 0, 10)
     closeButton.Text = "X"
     closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -65,48 +66,48 @@ if executorCheck then
         end
     end)
 
-    -- Create buttons for various features
+    -- Buttons for features
     local flyButton = Instance.new("TextButton")
-    flyButton.Size = UDim2.new(0, 280, 0, 40)
-    flyButton.Position = UDim2.new(0, 10, 0, 50)
+    flyButton.Size = UDim2.new(0, 380, 0, 40)
+    flyButton.Position = UDim2.new(0, 10, 0, 60)
     flyButton.Text = "Toggle Fly (WASD to control)"
-    flyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    flyButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     flyButton.TextSize = 18
     flyButton.Parent = frame
 
     local noclipButton = Instance.new("TextButton")
-    noclipButton.Size = UDim2.new(0, 280, 0, 40)
-    noclipButton.Position = UDim2.new(0, 10, 0, 100)
-    noclipButton.Text = "Toggle Noclip (No Collisions)"
-    noclipButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    noclipButton.Size = UDim2.new(0, 380, 0, 40)
+    noclipButton.Position = UDim2.new(0, 10, 0, 110)
+    noclipButton.Text = "Toggle Noclip"
+    noclipButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     noclipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     noclipButton.TextSize = 18
     noclipButton.Parent = frame
 
     local godmodeButton = Instance.new("TextButton")
-    godmodeButton.Size = UDim2.new(0, 280, 0, 40)
-    godmodeButton.Position = UDim2.new(0, 10, 0, 150)
-    godmodeButton.Text = "Toggle Godmode (Invincible)"
-    godmodeButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    godmodeButton.Size = UDim2.new(0, 380, 0, 40)
+    godmodeButton.Position = UDim2.new(0, 10, 0, 160)
+    godmodeButton.Text = "Toggle Godmode"
+    godmodeButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     godmodeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     godmodeButton.TextSize = 18
     godmodeButton.Parent = frame
 
-    -- TextBox for spawn command
+    -- Spawn TextBox
     local spawnTextBox = Instance.new("TextBox")
-    spawnTextBox.Size = UDim2.new(0, 280, 0, 40)
-    spawnTextBox.Position = UDim2.new(0, 10, 0, 200)
+    spawnTextBox.Size = UDim2.new(0, 380, 0, 40)
+    spawnTextBox.Position = UDim2.new(0, 10, 0, 210)
     spawnTextBox.Text = "/spawn (Item Name)"
     spawnTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    spawnTextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    spawnTextBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     spawnTextBox.TextSize = 18
     spawnTextBox.Parent = frame
 
-    -- **Fly Control**
+    -- Fly Control
     local flying = false
     local bodyGyro, bodyVelocity, humanoidRootPart
-    local flySpeed = 50  -- Speed of flight
+    local flySpeed = 50
     local controlDirection = Vector3.new(0, 0, 0)
 
     flyButton.MouseButton1Click:Connect(function()
@@ -129,17 +130,17 @@ if executorCheck then
                 if flying then
                     if input.UserInputType == Enum.UserInputType.Keyboard then
                         if input.KeyCode == Enum.KeyCode.W then
-                            controlDirection = Vector3.new(0, 0, -flySpeed) -- Forward
+                            controlDirection = Vector3.new(0, 0, -flySpeed)
                         elseif input.KeyCode == Enum.KeyCode.S then
-                            controlDirection = Vector3.new(0, 0, flySpeed) -- Backward
+                            controlDirection = Vector3.new(0, 0, flySpeed)
                         elseif input.KeyCode == Enum.KeyCode.A then
-                            controlDirection = Vector3.new(-flySpeed, 0, 0) -- Left
+                            controlDirection = Vector3.new(-flySpeed, 0, 0)
                         elseif input.KeyCode == Enum.KeyCode.D then
-                            controlDirection = Vector3.new(flySpeed, 0, 0) -- Right
+                            controlDirection = Vector3.new(flySpeed, 0, 0)
                         elseif input.KeyCode == Enum.KeyCode.Space then
-                            controlDirection = Vector3.new(0, flySpeed, 0) -- Up
+                            controlDirection = Vector3.new(0, flySpeed, 0)
                         elseif input.KeyCode == Enum.KeyCode.LeftShift then
-                            controlDirection = Vector3.new(0, -flySpeed, 0) -- Down
+                            controlDirection = Vector3.new(0, -flySpeed, 0)
                         end
                     end
                     bodyVelocity.Velocity = controlDirection
@@ -155,7 +156,7 @@ if executorCheck then
         end
     end)
 
-    -- **Toggle Noclip**
+    -- Noclip
     local noclipping = false
     noclipButton.MouseButton1Click:Connect(function()
         noclipping = not noclipping
@@ -167,7 +168,7 @@ if executorCheck then
         end
     end)
 
-    -- **Toggle Godmode**
+    -- Godmode
     local godMode = false
     godmodeButton.MouseButton1Click:Connect(function()
         godMode = not godMode
@@ -179,13 +180,12 @@ if executorCheck then
         end
     end)
 
-    -- **Handle Spawn Command**
+    -- Spawn Command
     spawnTextBox.FocusLost:Connect(function(enterPressed)
         if enterPressed then
             local itemName = spawnTextBox.Text:match("/spawn (.+)")
             if itemName then
                 local success, item = pcall(function()
-                    -- Attempt to find the item in the game by name
                     local itemToSpawn = game.ReplicatedStorage:FindFirstChild(itemName) or game.Workspace:FindFirstChild(itemName)
                     if itemToSpawn then
                         itemToSpawn:Clone().Parent = game.Players.LocalPlayer.Character
