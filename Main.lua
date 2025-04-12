@@ -1,3 +1,55 @@
+-- === AI NPC Creation ===
+local npc = Instance.new("Model")
+npc.Name = "AI_NPC"
+npc.Parent = workspace
+
+-- Creating parts for the NPC
+local head = Instance.new("Part")
+head.Name = "Head"
+head.Size = Vector3.new(2, 2, 2)
+head.Position = Vector3.new(0, 5, 0)
+head.Anchored = true
+head.Parent = npc
+
+local body = Instance.new("Part")
+body.Name = "Body"
+body.Size = Vector3.new(2, 3, 1)
+body.Position = Vector3.new(0, 3, 0)
+body.Anchored = true
+body.Parent = npc
+
+-- Creating a simple humanoid for NPC
+local humanoid = Instance.new("Humanoid")
+humanoid.Parent = npc
+
+-- Simple AI behavior: Follow the player
+local targetPlayer = game.Players.LocalPlayer
+local aiSpeed = 10
+
+-- AI follows the player
+local function followPlayer()
+    while true do
+        wait(0.1)
+        local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+        local direction = (targetPosition - npc.HumanoidRootPart.Position).unit
+        npc.HumanoidRootPart.CFrame = npc.HumanoidRootPart.CFrame + direction * aiSpeed
+    end
+end
+
+-- Function to communicate with the player (AI sending messages)
+local function communicateWithPlayer()
+    wait(5)
+    while true do
+        local message = "Hello, " .. targetPlayer.Name .. "! I'm an AI NPC."
+        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(message, "All")
+        wait(10)
+    end
+end
+
+-- Start the AI behavior
+spawn(followPlayer)
+spawn(communicateWithPlayer)
+
 -- === Fly Script (Infinite Yield Style) ===
 local flying = false
 local speed = 50
@@ -118,25 +170,6 @@ game.Players.LocalPlayer.Chatted:Connect(function(message)
     if command == "/announce" then
         local announcementMessage = table.concat(args, " ", 2)  -- Get the message part after /announce
         sendRealAnnouncement(announcementMessage)
-    end
-end)
-
--- === View Players' Usernames (IP info not possible in Roblox) ===
-function viewPlayerUsernames()
-    local playerNames = {}
-    for _, plr in pairs(game.Players:GetPlayers()) do
-        table.insert(playerNames, plr.Name)
-    end
-    return table.concat(playerNames, ", ")
-end
-
-game.Players.LocalPlayer.Chatted:Connect(function(message)
-    local args = string.split(message, " ")
-    local command = args[1]
-    
-    if command == "/viewplayers" then
-        local playerNames = viewPlayerUsernames()
-        print("Players in the server: " .. playerNames)
     end
 end)
 
@@ -270,21 +303,4 @@ announceButton.Parent = menu
 
 announceButton.MouseButton1Click:Connect(function()
     sendRealAnnouncement("System Update: Roblox is shutting down!")  -- Fake announcement message
-end)
-
--- === Script Execution ===
-game.Players.LocalPlayer.Chatted:Connect(function(message)
-    local args = string.split(message, " ")
-    local command = args[1]
-    local param = args[2]
-
-    if command == "/spawn" then
-        spawnItem(param)
-    end
-    if command == "/kick" then
-        kickPlayer(param)
-    end
-    if command == "/scriptinfo" then
-        print(scriptInfo())
-    end
 end)
