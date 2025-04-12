@@ -19,7 +19,7 @@ if executorCheck then
     local background = Instance.new("ImageLabel")
     background.Size = UDim2.new(1, 0, 1, 0) -- Fill the entire frame
     background.Position = UDim2.new(0, 0, 0, 0)
-    background.Image = "https://i.imgur.com/LjNdyNJ.png"  -- Solo Leveling background image (fixed)
+    background.Image = "https://i.imgur.com/LjNdyNJ.png"  -- Solo Leveling background image
     background.BackgroundTransparency = 1
     background.Parent = frame
 
@@ -119,12 +119,31 @@ if executorCheck then
     bodyVelocity.Velocity = Vector3.new(0, 0, 0)
     bodyVelocity.Parent = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
 
+    -- To control the movement
+    local flyDirection = Vector3.new(0, 0, 0)
+    local speed = 10  -- Change this to control speed
+    local upSpeed = 0
+    local rightSpeed = 0
+    local forwardSpeed = 0
+
+    -- Fly logic update
+    local function updateFly()
+        if isFlying then
+            local movement = Vector3.new(forwardSpeed, upSpeed, rightSpeed)
+            bodyVelocity.Velocity = movement * speed
+        else
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+        end
+    end
+
+    -- Control fly speed with WASD
     flyButton.MouseButton1Click:Connect(function()
         isFlying = not isFlying
         if isFlying then
-            bodyVelocity.Velocity = Vector3.new(0, flySpeed, 0)  -- Going up
+            flyButton.Text = "Flying... (WASD to control)"
         else
-            bodyVelocity.Velocity = Vector3.new(0, 0, 0)  -- Stop flying
+            flyButton.Text = "Toggle Fly (WASD to control)"
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
         end
     end)
 
@@ -156,54 +175,12 @@ if executorCheck then
         end
     end)
 
-    -- Real System Announcement (to be seen by everyone)
-    local function realAnnouncement(message)
-        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(message, "All")
-    end
-
-    -- Add real announcement button
-    local announcementButton = Instance.new("TextButton")
-    announcementButton.Size = UDim2.new(0, 380, 0, 40)
-    announcementButton.Position = UDim2.new(0, 10, 0, 210)
-    announcementButton.Text = "System Announcement"
-    announcementButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    announcementButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    announcementButton.TextSize = 18
-    announcementButton.Parent = frame
-
-    announcementButton.MouseButton1Click:Connect(function()
-        realAnnouncement("System Update: Roblox will be undergoing maintenance soon. Please wait.")
-    end)
-
-    -- Function to handle spawning items (e.g., guns)
-    local function spawnItem(itemName)
-        local tool = game.ReplicatedStorage:FindFirstChild(itemName) or game.Workspace:FindFirstChild(itemName)
-        if tool then
-            local clonedItem = tool:Clone()
-            clonedItem.Parent = game.Players.LocalPlayer.Backpack
-        else
-            warn("Item not found: " .. itemName)
-        end
-    end
-
     -- Listen to the chat for spawn commands
     game.Players.LocalPlayer.Chatted:Connect(function(message)
         if message:sub(1, 6) == "/spawn" then
             local itemName = message:sub(8)
-            -- Call the spawnItem function to spawn the weapon
+            -- Call the spawnItem function to spawn the item
             spawnItem(itemName)
-        elseif message:sub(1, 5) == "/kick" then
-            local playerName = message:sub(7)
-            -- Kick the player with the specified name
-            local playerToKick = game.Players:FindFirstChild(playerName)
-            if playerToKick then
-                playerToKick:Kick("You have been kicked by a system admin.")
-            else
-                print("Player not found: " .. playerName)
-            end
         end
     end)
-
-else
-    warn("This script can only be executed in a script executor environment.")
 end
