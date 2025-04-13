@@ -163,3 +163,24 @@ executeButton.MouseButton1Click:Connect(function()
     inputBox.Text = ""
 end)
 
+local WhitelistedUsers = {
+    [12345678] = true, -- Your Roblox userId
+    [98765432] = true  -- Other devs/admins
+}
+
+game.Players.PlayerAdded:Connect(function(player)
+    if WhitelistedUsers[player.UserId] then
+        player:SetAttribute("Bypass", true)
+    end
+end)
+if humanoid.WalkSpeed > 16 then
+    player:Kick("Speed hack detected")
+end
+if not player:GetAttribute("Bypass") and humanoid.WalkSpeed > 16 then
+    player:Kick("Speed hack detected")
+end
+remote.OnServerEvent:Connect(function(player, action)
+    if not player:GetAttribute("Bypass") then
+        -- validate "action"
+    end
+end)
