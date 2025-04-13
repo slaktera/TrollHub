@@ -7,7 +7,7 @@ local CoreGui = game:GetService("CoreGui")
 
 -- GUI Creation
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CustomScriptHub"
+ScreenGui.Name = "TrollHubMenu"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
@@ -122,6 +122,15 @@ local Commands = {
             InfoText.Text = infoText
             InfoWindow.Visible = true
         end
+    },
+    ["discord"] = {
+        Description = "Get the Discord link.",
+        Run = function()
+            -- Display Discord link
+            local infoText = "Join the Discord: https://discord.gg/uX6tAfBdpQ"
+            InfoText.Text = infoText
+            InfoWindow.Visible = true
+        end
     }
 }
 
@@ -172,4 +181,11 @@ CommandBox:GetPropertyChangedSignal("Text"):Connect(function()
         end
     end
 end)
+
+-- Adding background image (customizable for your theme)
+local background = Instance.new("ImageLabel")
+background.Size = UDim2.new(1, 0, 1, 0)
+background.Image = "rbxassetid://YOUR_IMAGE_ASSET_ID_HERE" -- replace with your image asset ID
+background.BackgroundTransparency = 1
+background.Parent = ScreenGui
 
