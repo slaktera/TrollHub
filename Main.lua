@@ -1,30 +1,27 @@
---[[
-  TrollHub Custom Command GUI (Inspired by Infinite Yield)
-  Features:
-  - Command bar toggled with ; key
-  - Fly, noclip, godmode, kick, spawn, announce, scriptinfo
-  - Autocomplete + Tooltips
-  - Dark themed, draggable GUI
-  - Only works in your own game (for certain commands)
+--[[ 
+  Custom Command GUI with Auto-Correction, Fly, Noclip, GodMode, and more
 ]]--
 
--- UI LIBRARIES
+-- Services
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
 local RS = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
 
+-- UI Creation
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "CommandGui"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = game.CoreGui
+ScreenGui.Parent = CoreGui
 
+-- Command Box UI (Textbox for commands)
 local CommandBox = Instance.new("TextBox")
 CommandBox.Size = UDim2.new(0, 400, 0, 40)
 CommandBox.Position = UDim2.new(0.5, -200, 1, -60)
 CommandBox.AnchorPoint = Vector2.new(0.5, 1)
 CommandBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-CommandBox.TextColor3 = Color3.new(1, 1, 1)
+CommandBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 CommandBox.PlaceholderText = "/command..."
 CommandBox.Font = Enum.Font.Code
 CommandBox.TextSize = 20
@@ -32,6 +29,7 @@ CommandBox.Visible = false
 CommandBox.ClearTextOnFocus = false
 CommandBox.Parent = ScreenGui
 
+-- Hint Label for command suggestions
 local HintLabel = Instance.new("TextLabel")
 HintLabel.Size = UDim2.new(0, 400, 0, 20)
 HintLabel.Position = UDim2.new(0.5, -200, 1, -80)
@@ -43,7 +41,42 @@ HintLabel.TextSize = 16
 HintLabel.Visible = false
 HintLabel.Parent = ScreenGui
 
--- COMMAND TABLE
+-- Script Info Window
+local ScriptInfoWindow = Instance.new("Frame")
+ScriptInfoWindow.Size = UDim2.new(0, 400, 0, 300)
+ScriptInfoWindow.Position = UDim2.new(0.5, -200, 0.5, -150)
+ScriptInfoWindow.AnchorPoint = Vector2.new(0.5, 0.5)
+ScriptInfoWindow.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+ScriptInfoWindow.Visible = false
+ScriptInfoWindow.Parent = ScreenGui
+
+local ScriptInfoText = Instance.new("TextLabel")
+ScriptInfoText.Size = UDim2.new(1, 0, 1, 0)
+ScriptInfoText.Text = "Loading script info..."
+ScriptInfoText.TextColor3 = Color3.fromRGB(255, 255, 255)
+ScriptInfoText.Font = Enum.Font.Code
+ScriptInfoText.TextSize = 16
+ScriptInfoText.TextWrapped = true
+ScriptInfoText.TextYAlignment = Enum.TextYAlignment.Top
+ScriptInfoText.BackgroundTransparency = 1
+ScriptInfoText.Parent = ScriptInfoWindow
+
+-- Add a close button for the Script Info window
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 100, 0, 30)
+CloseButton.Position = UDim2.new(1, -110, 0, 10)
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+CloseButton.Text = "Close"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.Font = Enum.Font.Code
+CloseButton.TextSize = 16
+CloseButton.Parent = ScriptInfoWindow
+
+CloseButton.MouseButton1Click:Connect(function()
+    ScriptInfoWindow.Visible = false
+end)
+
+-- COMMAND HANDLER
 local Commands = {
     ["fly"] = {
         Description = "Makes you fly. Use /fly [speed]",
@@ -68,7 +101,6 @@ local Commands = {
                 bv.Velocity = input.Unit * speed
             end)
 
-            -- Stop fly after 10 seconds for safety
             task.delay(10, function()
                 flying = false
                 bv:Destroy()
@@ -91,24 +123,46 @@ local Commands = {
             end)
         end
     },
-    ["announce"] = {
-        Description = "Send system message to all (/announce Hello!)",
+    ["godmode"] = {
+        Description = "Make yourself invincible (GodMode).",
         Run = function(args)
-            local text = table.concat(args, " ", 2)
+            LocalPlayer.Character.Humanoid.Health = math.huge
+        end
+    },
+    ["kick"] = {
+        Description = "Kick a player from the game. /kick [playerName]",
+        Run = function(args)
+            local targetName = args[2]
+            local targetPlayer = Players:FindFirstChild(targetName)
+            if targetPlayer then
+                targetPlayer:Kick("You have been kicked by a moderator!")
+            else
+                warn("Player not found.")
+            end
+        end
+    },
+    ["announce"] = {
+        Description = "Send system message to all. /announce [message]",
+        Run = function(args)
+            local message = table.concat(args, " ", 2)
             game.StarterGui:SetCore("ChatMakeSystemMessage", {
-                Text = text,
-                Color = Color3.new(1, 0.8, 0),
+                Text = message,
+                Color = Color3.fromRGB(1, 0.8, 0),
                 Font = Enum.Font.SourceSansBold,
                 FontSize = Enum.FontSize.Size24
             })
         end
     },
     ["scriptinfo"] = {
-        Description = "Show info about script commands",
+        Description = "Show script info about commands",
         Run = function()
+            -- Show the script info window
+            local infoText = "Commands:\n"
             for name, data in pairs(Commands) do
-                print("/" .. name .. " - " .. data.Description)
+                infoText = infoText .. "/" .. name .. " - " .. data.Description .. "\n"
             end
+            ScriptInfoText.Text = infoText
+            ScriptInfoWindow.Visible = true
         end
     }
 }
@@ -134,19 +188,32 @@ CommandBox.FocusLost:Connect(function(enterPressed)
     end
 end)
 
--- AUTOCOMPLETE
+-- AUTOCOMPLETE WITH TYPOS FIX
 CommandBox:GetPropertyChangedSignal("Text"):Connect(function()
     local text = CommandBox.Text
     if string.sub(text, 1, 1) == "/" then
         local input = string.sub(text, 2):lower()
+        local bestMatch = nil
+        local highestScore = 0
         for cmd, data in pairs(Commands) do
-            if cmd:sub(1, #input) == input then
-                HintLabel.Text = "/" .. cmd .. " - " .. data.Description
-                HintLabel.Visible = true
-                return
+            local score = 0
+            for i = 1, math.min(#input, #cmd) do
+                if input:sub(i, i) == cmd:sub(i, i) then
+                    score = score + 1
+                end
+            end
+            if score > highestScore then
+                highestScore = score
+                bestMatch = cmd
             end
         end
-        HintLabel.Visible = false
+
+        if bestMatch then
+            HintLabel.Text = "/" .. bestMatch .. " - " .. Commands[bestMatch].Description
+            HintLabel.Visible = true
+        else
+            HintLabel.Visible = false
+        end
     else
         HintLabel.Visible = false
     end
@@ -162,4 +229,6 @@ UIS.InputBegan:Connect(function(input, processed)
     end
 end)
 
+-- Debug Message
 print("Custom Command Script Loaded! Press ; to open.")
+
