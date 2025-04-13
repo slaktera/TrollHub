@@ -1,191 +1,128 @@
--- Services
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local UIS = game:GetService("UserInputService")
-local RS = game:GetService("RunService")
-local CoreGui = game:GetService("CoreGui")
+-- TrollHub Script (Customized for your game)
 
--- GUI Creation
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "TrollHubMenu"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = CoreGui
+-- Set up variables for the logo, name, and Discord link
+local logoImage = "rbxassetid://10511856020"  -- Your custom logo image ID
+local scriptName = "TrollHub"  -- The name of the script (can be customized)
+local discordLink = "https://discord.gg/uX6tAfBdpQ"  -- Your custom Discord link
 
--- Command Box
-local CommandBox = Instance.new("TextBox")
-CommandBox.Size = UDim2.new(0, 400, 0, 40)
-CommandBox.Position = UDim2.new(0.5, -200, 1, -60)
-CommandBox.AnchorPoint = Vector2.new(0.5, 1)
-CommandBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-CommandBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-CommandBox.PlaceholderText = "Enter Command..."
-CommandBox.Font = Enum.Font.Code
-CommandBox.TextSize = 20
-CommandBox.Visible = false
-CommandBox.ClearTextOnFocus = false
-CommandBox.Parent = ScreenGui
+-- Create GUI elements
+local menu = Instance.new("ScreenGui")
+menu.Parent = game.Players.LocalPlayer.PlayerGui
 
--- Info Window (Draggable)
-local InfoWindow = Instance.new("Frame")
-InfoWindow.Size = UDim2.new(0, 400, 0, 300)
-InfoWindow.Position = UDim2.new(0.5, -200, 0.5, -150)
-InfoWindow.AnchorPoint = Vector2.new(0.5, 0.5)
-InfoWindow.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-InfoWindow.Visible = false
-InfoWindow.Parent = ScreenGui
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 400, 0, 300)
+frame.Position = UDim2.new(0.5, -200, 0.5, -150)
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+frame.BackgroundTransparency = 0.7
+frame.Parent = menu
 
-local InfoText = Instance.new("TextLabel")
-InfoText.Size = UDim2.new(1, 0, 1, 0)
-InfoText.Text = "Loading script info..."
-InfoText.TextColor3 = Color3.fromRGB(255, 255, 255)
-InfoText.Font = Enum.Font.Code
-InfoText.TextSize = 16
-InfoText.TextWrapped = true
-InfoText.TextYAlignment = Enum.TextYAlignment.Top
-InfoText.BackgroundTransparency = 1
-InfoText.Parent = InfoWindow
+-- Create a label for the script name
+local nameLabel = Instance.new("TextLabel")
+nameLabel.Size = UDim2.new(1, 0, 0, 50)
+nameLabel.Position = UDim2.new(0, 0, 0, 0)
+nameLabel.Text = scriptName
+nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+nameLabel.TextSize = 24
+nameLabel.TextAlignment = Enum.TextAlignment.Center
+nameLabel.BackgroundTransparency = 1
+nameLabel.Parent = frame
 
-local InfoWindowCloseButton = Instance.new("TextButton")
-InfoWindowCloseButton.Size = UDim2.new(0, 100, 0, 30)
-InfoWindowCloseButton.Position = UDim2.new(1, -110, 0, 10)
-InfoWindowCloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-InfoWindowCloseButton.Text = "Close"
-InfoWindowCloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-InfoWindowCloseButton.Font = Enum.Font.Code
-InfoWindowCloseButton.TextSize = 16
-InfoWindowCloseButton.Parent = InfoWindow
+-- Add the logo image
+local logo = Instance.new("ImageLabel")
+logo.Size = UDim2.new(0, 100, 0, 100)
+logo.Position = UDim2.new(0.5, -50, 0.5, -50)
+logo.Image = logoImage
+logo.BackgroundTransparency = 1
+logo.Parent = frame
 
--- Draggable functionality for Info Window
+-- Create the 'Close' button
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 50, 0, 30)
+closeButton.Position = UDim2.new(1, -50, 0, 0)
+closeButton.Text = "Close"
+closeButton.Parent = frame
+
+-- Close button action
+closeButton.MouseButton1Click:Connect(function()
+    menu:Destroy()
+end)
+
+-- Create the Discord button
+local discordButton = Instance.new("TextButton")
+discordButton.Size = UDim2.new(0, 100, 0, 30)
+discordButton.Position = UDim2.new(0.5, -50, 1, -50)
+discordButton.Text = "Discord"
+discordButton.Parent = frame
+
+-- Open Discord when the button is clicked
+discordButton.MouseButton1Click:Connect(function()
+    setclipboard(discordLink)
+    print("Discord link copied to clipboard: " .. discordLink)
+end)
+
+-- Draggable functionality
 local dragging = false
-local dragInput, dragStart, startPos
-InfoWindow.InputBegan:Connect(function(input)
+local dragInput
+local dragStart
+local startPos
+
+frame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
         dragStart = input.Position
-        startPos = InfoWindow.Position
+        startPos = frame.Position
+        input.Changed:Connect(function()
+            if not input.UserInputState == Enum.UserInputState.Change then
+                dragging = false
+            end
+        end)
     end
 end)
 
-InfoWindow.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+frame.InputChanged:Connect(function(input)
+    if dragging then
         local delta = input.Position - dragStart
-        InfoWindow.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        frame.Position = UDim2.new(startPos.X.Scale, delta.X, startPos.Y.Scale, delta.Y)
     end
 end)
 
-InfoWindow.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
+-- Command handler for chat input (Example Commands)
+local function handleCommand(command)
+    local args = command:split(" ")
+    local cmd = args[1]
 
--- Close the Info Window
-InfoWindowCloseButton.MouseButton1Click:Connect(function()
-    InfoWindow.Visible = false
-end)
-
--- Toggle the Command Box (open and close with a key)
-UIS.InputBegan:Connect(function(input, processed)
-    if input.KeyCode == Enum.KeyCode.Semicolon and not processed then
-        CommandBox.Visible = not CommandBox.Visible
-    end
-end)
-
--- Commands Setup
-local Commands = {
-    ["fly"] = {
-        Description = "Makes you fly. Use /fly [speed]",
-        Run = function(args)
-            -- Fly logic (use speed value from args)
-        end
-    },
-    ["noclip"] = {
-        Description = "Toggle noclip.",
-        Run = function(args)
-            -- Noclip logic
-        end
-    },
-    ["godmode"] = {
-        Description = "Make yourself invincible.",
-        Run = function(args)
-            -- Godmode logic
-        end
-    },
-    ["scriptinfo"] = {
-        Description = "Show script info about commands",
-        Run = function()
-            -- Show Script Info in the draggable Info Window
-            local infoText = "Commands:\n"
-            for name, data in pairs(Commands) do
-                infoText = infoText .. "/" .. name .. " - " .. data.Description .. "\n"
-            end
-            InfoText.Text = infoText
-            InfoWindow.Visible = true
-        end
-    },
-    ["discord"] = {
-        Description = "Get the Discord link.",
-        Run = function()
-            -- Display Discord link
-            local infoText = "Join the Discord: https://discord.gg/uX6tAfBdpQ"
-            InfoText.Text = infoText
-            InfoWindow.Visible = true
-        end
-    }
-}
-
--- Handle command input and execute corresponding function
-CommandBox.FocusLost:Connect(function(enterPressed)
-    if enterPressed then
-        local input = CommandBox.Text
-        CommandBox.Text = ""
-        local split = {}
-        for word in string.gmatch(input, "[^%s]+") do
-            table.insert(split, word)
-        end
-
-        local command = string.lower(string.sub(split[1] or "", 2))
-        if Commands[command] then
-            Commands[command].Run(split)
-        else
-            warn("Unknown command: /" .. command)
-        end
-    end
-end)
-
--- Auto-correct command suggestions
-CommandBox:GetPropertyChangedSignal("Text"):Connect(function()
-    local text = CommandBox.Text
-    if string.sub(text, 1, 1) == "/" then
-        local input = string.sub(text, 2):lower()
-        local bestMatch = nil
-        local highestScore = 0
-        for cmd, data in pairs(Commands) do
-            local score = 0
-            for i = 1, math.min(#input, #cmd) do
-                if input:sub(i, i) == cmd:sub(i, i) then
-                    score = score + 1
-                end
-            end
-            if score > highestScore then
-                highestScore = score
-                bestMatch = cmd
+    if cmd == "/fly" then
+        -- Add Fly functionality
+        print("Fly activated with speed " .. args[2])
+    elseif cmd == "/noclip" then
+        -- Add Noclip functionality
+        print("Noclip activated")
+    elseif cmd == "/godmode" then
+        -- Add Godmode functionality
+        print("Godmode activated")
+    elseif cmd == "/spawn" then
+        -- Add Spawn functionality
+        print("Spawning item: " .. args[2])
+    elseif cmd == "/scriptinfo" then
+        -- Show info about the script
+        print("Script Info: This script contains several commands such as /fly, /noclip, /godmode, /spawn, and more.")
+    elseif cmd == "/discord" then
+        -- Open Discord link
+        print("Opening Discord link: " .. discordLink)
+    elseif cmd == "/kick" then
+        local playerName = args[2]
+        if playerName then
+            local playerToKick = game.Players:FindFirstChild(playerName)
+            if playerToKick then
+                playerToKick:Kick("You have been kicked by a TrollHub admin!")
             end
         end
+    end
+end
 
-        if bestMatch then
-            HintLabel.Text = "/" .. bestMatch
-            HintLabel.Visible = true
-        else
-            HintLabel.Visible = false
-        end
+-- Listen for commands in the chat
+game.Players.LocalPlayer.Chatted:Connect(function(message)
+    if message:sub(1, 1) == "/" then
+        handleCommand(message)
     end
 end)
-
--- Adding background image (customizable for your theme)
-local background = Instance.new("ImageLabel")
-background.Size = UDim2.new(1, 0, 1, 0)
-background.Image = "rbxassetid://10511856020" -- replace with your image asset ID
-background.BackgroundTransparency = 1
-background.Parent = ScreenGui
-
