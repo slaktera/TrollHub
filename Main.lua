@@ -1,235 +1,203 @@
--- Initialize variables
-local scriptName = "TrollHub"
-local discordLink = "https://discord.gg/uX6tAfBdpQ"  -- Your custom Discord link
-local logoImage = "rbxassetid://10511856020"  -- Your custom logo image ID
-local menuVisible = false
+-- TrollHub | Custom Infinite Yield-based Script Hub
 
--- Create the main GUI for the menu
-local menu = Instance.new("ScreenGui")
-menu.Parent = game.Players.LocalPlayer.PlayerGui
-menu.Name = "TrollHubMenu"
-
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 400, 0, 300)
-frame.Position = UDim2.new(0.5, -200, 0.5, -150)
-frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-frame.BackgroundTransparency = 0.5
-frame.Parent = menu
-
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, 0, 0, 50)
-titleLabel.Text = scriptName
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.TextSize = 24
-titleLabel.TextAlignment = Enum.TextAlignment.Center
-titleLabel.BackgroundTransparency = 1
-titleLabel.Parent = frame
-
--- Create Logo
-local logo = Instance.new("ImageLabel")
-logo.Size = UDim2.new(0, 100, 0, 100)
-logo.Position = UDim2.new(0.5, -50, 0.5, -50)
-logo.Image = logoImage
-logo.BackgroundTransparency = 1
-logo.Parent = frame
-
--- Create 'Close' button
-local closeButton = Instance.new("TextButton")
-closeButton.Size = UDim2.new(0, 50, 0, 30)
-closeButton.Position = UDim2.new(1, -50, 0, 0)
-closeButton.Text = "Close"
-closeButton.Parent = frame
-
-closeButton.MouseButton1Click:Connect(function()
-    menu:Destroy()
-    menuVisible = false
+-- Only run if executed from an executor
+local isExecutor = pcall(function()
+    return getgenv or getrenv
 end)
 
--- Create 'Discord' button
-local discordButton = Instance.new("TextButton")
-discordButton.Size = UDim2.new(0, 100, 0, 30)
-discordButton.Position = UDim2.new(0.5, -50, 1, -50)
-discordButton.Text = "Discord"
-discordButton.Parent = frame
+if not isExecutor then
+    warn("TrollHub can only be run through an executor.")
+    return
+end
 
-discordButton.MouseButton1Click:Connect(function()
-    setclipboard(discordLink)
-    print("Discord link copied to clipboard: " .. discordLink)
+-- Setup services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+
+-- Global storage
+getgenv().TrollHub = {
+    Commands = {},
+    UI = {},
+    Prefix = "/"
+}
+
+-- Basic UI Setup
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "TrollHubUI"
+
+-- Background Frame
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 500, 0, 300)
+MainFrame.Position = UDim2.new(0.25, 0, 0.2, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.BorderSizePixel = 0
+MainFrame.Name = "MainFrame"
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+-- Solo Leveling image background
+local Background = Instance.new("ImageLabel", MainFrame)
+Background.Size = UDim2.new(1, 0, 1, 0)
+Background.Position = UDim2.new(0, 0, 0, 0)
+Background.Image = "rbxassetid://10511856020"
+Background.ImageTransparency = 0.3
+Background.ScaleType = Enum.ScaleType.Crop
+Background.ZIndex = 0
+
+-- Top Bar (for close button)
+local TopBar = Instance.new("Frame", MainFrame)
+TopBar.Size = UDim2.new(1, 0, 0, 30)
+TopBar.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+TopBar.ZIndex = 2
+
+-- Close Button
+local CloseBtn = Instance.new("TextButton", TopBar)
+CloseBtn.Size = UDim2.new(0, 30, 1, 0)
+CloseBtn.Position = UDim2.new(1, -30, 0, 0)
+CloseBtn.Text = "X"
+CloseBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+CloseBtn.TextColor3 = Color3.new(1, 1, 1)
+CloseBtn.ZIndex = 3
+CloseBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+end)
+-- Command Bar Input
+local CommandBar = Instance.new("TextBox", ScreenGui)
+CommandBar.Size = UDim2.new(0, 500, 0, 30)
+CommandBar.Position = UDim2.new(0.25, 0, 0.55, 0)
+CommandBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+CommandBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+CommandBar.PlaceholderText = "/fly, /kick player, /spawn item"
+CommandBar.ClearTextOnFocus = false
+CommandBar.TextXAlignment = Enum.TextXAlignment.Left
+CommandBar.Font = Enum.Font.SourceSans
+CommandBar.TextSize = 18
+CommandBar.Visible = true
+
+-- Focus on pressing semicolon
+UserInputService = game:GetService("UserInputService")
+UserInputService.InputBegan:Connect(function(input, processed)
+    if not processed and input.KeyCode == Enum.KeyCode.Semicolon then
+        CommandBar:CaptureFocus()
+    end
 end)
 
--- Make the menu draggable
-local dragging = false
-local dragInput
-local dragStart
-local startPos
+-- Command Autocomplete (basic)
+local function AutoComplete(input)
+    local matches = {}
+    for name, _ in pairs(TrollHub.Commands) do
+        if name:lower():sub(1, #input) == input:lower() then
+            table.insert(matches, name)
+        end
+    end
+    return matches
+end
 
-frame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = frame.Position
-        input.Changed:Connect(function()
-            if not input.UserInputState == Enum.UserInputState.Change then
-                dragging = false
-            end
+-- Command Handler
+CommandBar.FocusLost:Connect(function(enterPressed)
+    if not enterPressed then return end
+    local text = CommandBar.Text
+    CommandBar.Text = ""
+
+    if text:sub(1,1) ~= TrollHub.Prefix then return end
+
+    local split = text:sub(2):split(" ")
+    local cmd = split[1]:lower()
+    table.remove(split, 1)
+
+    local commandFunc = TrollHub.Commands[cmd]
+    if commandFunc then
+        pcall(function()
+            commandFunc(unpack(split))
         end)
+    else
+        StarterGui:SetCore("ChatMakeSystemMessage", {
+            Text = "[TrollHub] Command '/" .. cmd .. "' not found.",
+            Color = Color3.fromRGB(255, 50, 50)
+        })
     end
 end)
+-- Define Commands
+TrollHub.Commands = {}
 
-frame.InputChanged:Connect(function(input)
-    if dragging then
-        local delta = input.Position - dragStart
-        frame.Position = UDim2.new(startPos.X.Scale, delta.X, startPos.Y.Scale, delta.Y)
-    end
-end)
+-- /fly [speed]
+TrollHub.Commands["fly"] = function(speed)
+    speed = tonumber(speed) or 50
+    local plr = game.Players.LocalPlayer
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
 
--- Commands for fly, noclip, godmode, etc.
-local flying = false
-local flySpeed = 50
+    local flying = true
+    local vel = Instance.new("BodyVelocity")
+    vel.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    vel.Velocity = Vector3.new(0, 0, 0)
+    vel.Parent = hrp
 
-local function fly()
-    local character = game.Players.LocalPlayer.Character
-    local humanoid = character:FindFirstChild("Humanoid")
-    local bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.MaxForce = Vector3.new(10000, 10000, 10000)
-    bodyVelocity.Velocity = Vector3.new(0, flySpeed, 0)
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if flying then
+            local move = Vector3.new()
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then move = move + Vector3.new(0, 0, -1) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then move = move + Vector3.new(0, 0, 1) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then move = move + Vector3.new(-1, 0, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then move = move + Vector3.new(1, 0, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0, 1, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then move = move + Vector3.new(0, -1, 0) end
 
-    if not flying then
-        flying = true
-        bodyVelocity.Parent = character.HumanoidRootPart
-        humanoid.PlatformStand = true
-    else
-        flying = false
-        bodyVelocity.Parent = nil
-        humanoid.PlatformStand = false
-    end
-end
-
--- Noclip function
-local function noclip()
-    local character = game.Players.LocalPlayer.Character
-    local humanoid = character:FindFirstChild("Humanoid")
-    if humanoid then
-        humanoid:GetPropertyChangedSignal("FloorMaterial"):Connect(function()
-            if humanoid.FloorMaterial == Enum.Material.Air then
-                character:Move(Vector3.new(0, 10, 0))
-            end
-        end)
-    end
-end
-
--- Godmode function
-local function godmode()
-    local character = game.Players.LocalPlayer.Character
-    if character then
-        local humanoid = character:FindFirstChild("Humanoid")
-        if humanoid then
-            humanoid.Health = humanoid.MaxHealth
+            vel.Velocity = (workspace.CurrentCamera.CFrame:VectorToWorldSpace(move)).Unit * speed
         end
-    end
-end
--- Create function for chat commands
-local function onChatMessage(message)
-    local args = string.split(message, " ")
-    local command = args[1]:lower()
-
-    if command == "/fly" then
-        fly()  -- Toggle fly
-    elseif command == "/noclip" then
-        noclip()  -- Toggle noclip
-    elseif command == "/godmode" then
-        godmode()  -- Toggle godmode
-    elseif command == "/kick" then
-        local playerName = args[2]
-        local player = game.Players:FindFirstChild(playerName)
-        if player then
-            player:Kick("You have been kicked from the game!")
-        else
-            print("Player not found.")
-        end
-    elseif command == "/spawn" then
-        local itemName = args[2]
-        if itemName then
-            spawnItem(itemName)  -- Spawn item based on name
-        else
-            print("Please specify an item to spawn.")
-        end
-    elseif command == "/scriptinfo" then
-        openScriptInfo()  -- Show the script info menu
-    elseif command == "/discord" then
-        setclipboard(discordLink)
-        print("Discord link copied to clipboard: " .. discordLink)
-    else
-        print("Unknown command.")
-    end
-end
-
--- Listen to chat messages
-game.Players.LocalPlayer.Chatted:Connect(onChatMessage)
-
--- Function to spawn an item based on the name
-local function spawnItem(itemName)
-    -- Assuming items are stored in ReplicatedStorage or another location
-    local item = game.ReplicatedStorage:FindFirstChild(itemName)
-    if item then
-        local clone = item:Clone()
-        clone.Parent = game.Workspace
-        clone.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
-    else
-        print("Item not found in ReplicatedStorage.")
-    end
-end
-
--- Function to open script info menu
-local function openScriptInfo()
-    -- Create a new frame for the script info
-    local infoFrame = Instance.new("Frame")
-    infoFrame.Size = UDim2.new(0, 400, 0, 300)
-    infoFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
-    infoFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    infoFrame.BackgroundTransparency = 0.5
-    infoFrame.Parent = menu
-
-    -- Title label for script info
-    local infoLabel = Instance.new("TextLabel")
-    infoLabel.Size = UDim2.new(1, 0, 0, 50)
-    infoLabel.Text = "TrollHub Script Info"
-    infoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    infoLabel.TextSize = 24
-    infoLabel.TextAlignment = Enum.TextAlignment.Center
-    infoLabel.BackgroundTransparency = 1
-    infoLabel.Parent = infoFrame
-
-    -- TextBox for detailed command info
-    local infoTextBox = Instance.new("TextBox")
-    infoTextBox.Size = UDim2.new(1, 0, 0, 200)
-    infoTextBox.Position = UDim2.new(0, 0, 0.1, 0)
-    infoTextBox.Text = [[
-Commands:
-- /fly: Toggle flying mode (Press again to stop flying)
-- /noclip: Toggle noclip (Pass through walls)
-- /godmode: Enable or disable godmode (Invincibility)
-- /kick <playerName>: Kick a player from the game
-- /spawn <itemName>: Spawn an item in the game
-- /discord: Get the Discord link
-
-More commands coming soon!
-]]
-    infoTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    infoTextBox.TextSize = 14
-    infoTextBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    infoTextBox.BackgroundTransparency = 0.5
-    infoTextBox.TextWrapped = true
-    infoTextBox.Parent = infoFrame
-
-    -- Close button for the script info menu
-    local closeButton = Instance.new("TextButton")
-    closeButton.Size = UDim2.new(0, 50, 0, 30)
-    closeButton.Position = UDim2.new(1, -50, 0, 0)
-    closeButton.Text = "Close"
-    closeButton.Parent = infoFrame
-
-    closeButton.MouseButton1Click:Connect(function()
-        infoFrame:Destroy()
     end)
+end
+
+-- /noclip
+TrollHub.Commands["noclip"] = function()
+    local char = game.Players.LocalPlayer.Character
+    for _, part in ipairs(char:GetDescendants()) do
+        if part:IsA("BasePart") and part.CanCollide == true then
+            part.CanCollide = false
+        end
+    end
+end
+
+-- /kick [playername]
+TrollHub.Commands["kick"] = function(name)
+    for _, plr in ipairs(game.Players:GetPlayers()) do
+        if plr.Name:lower():sub(1, #name) == name:lower() then
+            plr:Kick("You have been trolled by TrollHub.")
+        end
+    end
+end
+
+-- /spawn [item]
+TrollHub.Commands["spawn"] = function(item)
+    local replicated = game:GetService("ReplicatedStorage")
+    local toClone = replicated:FindFirstChild(item)
+    if toClone then
+        local clone = toClone:Clone()
+        clone.Parent = game.Players.LocalPlayer.Backpack
+    else
+        warn("Item not found in ReplicatedStorage")
+    end
+end
+
+-- /scriptinfo
+TrollHub.Commands["scriptinfo"] = function()
+    local info = Instance.new("TextLabel", ScreenGui)
+    info.Size = UDim2.new(0, 400, 0, 200)
+    info.Position = UDim2.new(0.5, -200, 0.5, -100)
+    info.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    info.TextColor3 = Color3.fromRGB(255, 255, 255)
+    info.TextWrapped = true
+    info.Text = [[
+    [TrollHub Commands]
+    /fly [speed] - Start flying with speed
+    /noclip - Walk through objects
+    /kick [player] - Kick a player
+    /spawn [item] - Spawn item from ReplicatedStorage
+    /scriptinfo - Show this info
+    ]]
+    info.ZIndex = 10
 end
