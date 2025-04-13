@@ -1,179 +1,172 @@
--- Check if we are running in an executor environment
-local executorCheck = pcall(function() return game:GetService("CoreGui") end)
+-- Custom Admin Script for Your Game
+-- Features: Movable menu, Fly, Noclip, Godmode, Spawn, Kick, Announce, Script Info
 
-if executorCheck then
-    -- Create the main ScreenGui
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "TrollHubMenu"
-    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+--== CONFIGURATION ==--
+local COMMAND_KEY = ";" -- Key to open the command bar
 
-    -- Create the main frame for the menu
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 250, 0, 400)
-    frame.Position = UDim2.new(0, 10, 0, 10)
-    frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    frame.Parent = screenGui
+--== SERVICES ==--
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
-    -- Add title to the menu
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(0, 250, 0, 40)
-    titleLabel.Position = UDim2.new(0, 0, 0, 0)
-    titleLabel.Text = "TrollHub Menu"
-    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    titleLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    titleLabel.Parent = frame
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
 
-    -- Create the close button
-    local closeButton = Instance.new("TextButton")
-    closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(0, 220, 0, 10)
-    closeButton.Text = "X"
-    closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    closeButton.Parent = frame
-    closeButton.MouseButton1Click:Connect(function()
-        screenGui:Destroy()  -- Close the menu when clicked
-    end)
+--== UI CREATION ==--
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+ScreenGui.Name = "CustomAdminUI"
 
-    -- Make the frame draggable
-    local dragging = false
-    local dragInput, mousePos, framePos
-    frame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragInput = input
-            mousePos = input.Position
-            framePos = frame.Position
+-- Command bar
+local CommandBox = Instance.new("TextBox")
+CommandBox.Parent = ScreenGui
+CommandBox.Position = UDim2.new(0.3, 0, 0.05, 0)
+CommandBox.Size = UDim2.new(0.4, 0, 0.05, 0)
+CommandBox.PlaceholderText = "/command..."
+CommandBox.Visible = false
+CommandBox.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+CommandBox.TextColor3 = Color3.new(1, 1, 1)
+CommandBox.ClearTextOnFocus = false
+CommandBox.TextSize = 18
+
+-- Tooltip
+local Tooltip = Instance.new("TextLabel")
+Tooltip.Parent = ScreenGui
+Tooltip.Size = UDim2.new(0.4, 0, 0.03, 0)
+Tooltip.Position = UDim2.new(0.3, 0, 0.1, 0)
+Tooltip.BackgroundTransparency = 1
+Tooltip.TextColor3 = Color3.new(1, 1, 1)
+Tooltip.Text = ""
+Tooltip.TextSize = 14
+Tooltip.Visible = false
+
+--== COMMAND HANDLERS ==--
+local function enableFly(speed)
+    speed = tonumber(speed) or 50
+    local flying = true
+    local bodyGyro = Instance.new("BodyGyro")
+    local bodyVelocity = Instance.new("BodyVelocity")
+
+    bodyGyro.P = 9e4
+    bodyGyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+    bodyGyro.cframe = LocalPlayer.Character.HumanoidRootPart.CFrame
+    bodyGyro.Parent = LocalPlayer.Character.HumanoidRootPart
+
+    bodyVelocity.velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.maxForce = Vector3.new(9e9, 9e9, 9e9)
+    bodyVelocity.Parent = LocalPlayer.Character.HumanoidRootPart
+
+    RunService.RenderStepped:Connect(function()
+        if flying then
+            bodyGyro.CFrame = workspace.CurrentCamera.CFrame
+            local cam = workspace.CurrentCamera
+            local direction = Vector3.new()
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then direction = direction + cam.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then direction = direction - cam.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then direction = direction - cam.CFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then direction = direction + cam.CFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then direction = direction + Vector3.new(0, 1, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then direction = direction - Vector3.new(0, 1, 0) end
+            bodyVelocity.Velocity = direction.Unit * speed
         end
     end)
+end
 
-    frame.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
-            local delta = input.Position - mousePos
-            frame.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
-        end
-    end)
-
-    frame.InputEnded:Connect(function(input)
-        if input == dragInput then
-            dragging = false
-        end
-    end)
-
-    -- Create buttons for features like Fly, Noclip, Godmode
-    local flyButton = Instance.new("TextButton")
-    flyButton.Size = UDim2.new(0, 250, 0, 40)
-    flyButton.Position = UDim2.new(0, 0, 0, 50)
-    flyButton.Text = "Toggle Fly"
-    flyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    flyButton.Parent = frame
-
-    local noclipButton = Instance.new("TextButton")
-    noclipButton.Size = UDim2.new(0, 250, 0, 40)
-    noclipButton.Position = UDim2.new(0, 0, 0, 100)
-    noclipButton.Text = "Toggle Noclip"
-    noclipButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    noclipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    noclipButton.Parent = frame
-
-    local godmodeButton = Instance.new("TextButton")
-    godmodeButton.Size = UDim2.new(0, 250, 0, 40)
-    godmodeButton.Position = UDim2.new(0, 0, 0, 150)
-    godmodeButton.Text = "Toggle Godmode"
-    godmodeButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    godmodeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    godmodeButton.Parent = frame
-
-    -- TextBox for spawn command
-    local spawnTextBox = Instance.new("TextBox")
-    spawnTextBox.Size = UDim2.new(0, 250, 0, 40)
-    spawnTextBox.Position = UDim2.new(0, 0, 0, 200)
-    spawnTextBox.Text = "/spawn (Item Name)"
-    spawnTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    spawnTextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    spawnTextBox.Parent = frame
-
-    -- Toggle Fly functionality
-    local flying = false
-    local bodyGyro, bodyVelocity, humanoidRootPart
-    flyButton.MouseButton1Click:Connect(function()
-        if not flying then
-            flying = true
-            humanoidRootPart = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-            bodyGyro = Instance.new("BodyGyro")
-            bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
-            bodyGyro.CFrame = humanoidRootPart.CFrame
-            bodyGyro.Parent = humanoidRootPart
-            
-            bodyVelocity = Instance.new("BodyVelocity")
-            bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
-            bodyVelocity.Velocity = Vector3.new(0, 50, 0)
-            bodyVelocity.Parent = humanoidRootPart
-
-            print("Fly Enabled")
-        else
-            flying = false
-            if bodyGyro then bodyGyro:Destroy() end
-            if bodyVelocity then bodyVelocity:Destroy() end
-            print("Fly Disabled")
-        end
-    end)
-
-    -- Toggle Noclip functionality
-    local noclipping = false
-    noclipButton.MouseButton1Click:Connect(function()
-        noclipping = not noclipping
-        local character = game.Players.LocalPlayer.Character
-        local humanoid = character and character:FindFirstChild("Humanoid")
-        if humanoid then
-            humanoid.PlatformStand = noclipping
-            print(noclipping and "Noclip Enabled" or "Noclip Disabled")
-        end
-    end)
-
-    -- Toggle Godmode functionality
-    local godMode = false
-    godmodeButton.MouseButton1Click:Connect(function()
-        godMode = not godMode
-        local character = game.Players.LocalPlayer.Character
-        if character and character:FindFirstChild("Humanoid") then
-            local humanoid = character.Humanoid
-            humanoid.Health = godMode and math.huge or humanoid.Health
-            print(godMode and "Godmode Enabled" or "Godmode Disabled")
-        end
-    end)
-
-    -- Handle item spawning with command
-    spawnTextBox.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            local itemName = spawnTextBox.Text:match("/spawn (.+)")
-            if itemName then
-                local success, item = pcall(function()
-                    -- Attempt to find the item in the game by name
-                    local itemToSpawn = game.ReplicatedStorage:FindFirstChild(itemName) or game.Workspace:FindFirstChild(itemName)
-                    if itemToSpawn then
-                        itemToSpawn:Clone().Parent = game.Players.LocalPlayer.Character
-                    end
-                end)
-                if not success then
-                    warn("Failed to spawn item: " .. itemName)
-                end
+local function toggleNoclip()
+    RunService.Stepped:Connect(function()
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
             end
         end
     end)
-
-    -- Load the external script from the raw GitHub URL
-    local url = "https://raw.githubusercontent.com/slaktera/TrollHub/main/Main.lua"
-    local success, result = pcall(function()
-        loadstring(game:HttpGet(url))()
-    end)
-
-    if not success then
-        warn("Error loading the script: " .. result)
-    else
-        print("TrollHub script loaded successfully!")
-    end
-else
-    warn("This script can only be executed in an executor.")
 end
+
+local function godMode()
+    local char = LocalPlayer.Character
+    if char then
+        char.Humanoid.Name = "1"
+        local newHumanoid = char.Humanoid:Clone()
+        newHumanoid.Parent = char
+        newHumanoid.Name = "Humanoid"
+        wait(0.1)
+        char["1"]:Destroy()
+    end
+end
+
+local function spawnItem(itemName)
+    local item = ReplicatedStorage:FindFirstChild(itemName)
+    if item then
+        local clone = item:Clone()
+        clone.Parent = LocalPlayer.Backpack
+    end
+end
+
+local function kickPlayer(name)
+    local target = Players:FindFirstChild(name)
+    if target and LocalPlayer.UserId == game.CreatorId then
+        target:Kick("You have been kicked by an admin.")
+    end
+end
+
+local function announce(message)
+    game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("[ANNOUNCEMENT]: " .. message, "All")
+end
+
+local function showScriptInfo()
+    print("Available Commands:")
+    print("/fly [speed] - Enables fly with optional speed")
+    print("/noclip - Toggle noclip")
+    print("/god - Enable god mode")
+    print("/spawn [itemName] - Spawns an item from ReplicatedStorage")
+    print("/kick [playerName] - Kicks player (admin only)")
+    print("/announce [message] - Sends global announcement")
+    print("/scriptinfo - Lists all commands")
+end
+
+--== COMMAND PARSER ==--
+local commands = {
+    ["fly"] = enableFly,
+    ["noclip"] = toggleNoclip,
+    ["god"] = godMode,
+    ["spawn"] = spawnItem,
+    ["kick"] = kickPlayer,
+    ["announce"] = announce,
+    ["scriptinfo"] = showScriptInfo,
+}
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode[COMMAND_KEY:upper()] then
+        CommandBox.Visible = true
+        CommandBox:CaptureFocus()
+    end
+end)
+
+CommandBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local text = CommandBox.Text
+        local args = text:split(" ")
+        local command = args[1]:gsub("/", "")
+        table.remove(args, 1)
+        if commands[command] then
+            commands[command](unpack(args))
+        end
+    end
+    CommandBox.Text = ""
+    Tooltip.Visible = false
+    CommandBox.Visible = false
+end)
+
+CommandBox:GetPropertyChangedSignal("Text"):Connect(function()
+    local text = CommandBox.Text:lower():gsub("/", "")
+    for name, _ in pairs(commands) do
+        if name:sub(1, #text) == text then
+            Tooltip.Text = "/" .. name
+            Tooltip.Visible = true
+            return
+        end
+    end
+    Tooltip.Visible = false
+end)
+
+print("[Custom Admin UI Loaded]")
