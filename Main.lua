@@ -17,7 +17,7 @@ local background = Instance.new("ImageLabel")
 background.Size = UDim2.new(1, 0, 1, 0)
 background.Position = UDim2.new(0, 0, 0, 0)
 background.BackgroundTransparency = 1
-background.Image = "rbxassetid://YOUR_IMAGE_ID"  -- Replace with the image ID of Sung Jinwoo
+background.Image = "rbxassetid://10511856020"  -- Solo Leveling Image ID
 background.Parent = menu
 
 -- Create the command bar
