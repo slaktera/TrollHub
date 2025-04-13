@@ -4,7 +4,7 @@ local discordLink = "https://discord.gg/uX6tAfBdpQ"  -- Your custom Discord link
 local logoImage = "rbxassetid://10511856020"  -- Your custom logo image ID
 local menuVisible = false
 
--- Create the main GUI
+-- Create the main GUI for the menu
 local menu = Instance.new("ScreenGui")
 menu.Parent = game.Players.LocalPlayer.PlayerGui
 menu.Name = "TrollHubMenu"
@@ -83,59 +83,153 @@ frame.InputChanged:Connect(function(input)
     end
 end)
 
--- Function to handle commands
-local function handleCommand(command)
-    local args = command:split(" ")
-    local cmd = args[1]
+-- Commands for fly, noclip, godmode, etc.
+local flying = false
+local flySpeed = 50
 
-    if cmd == "/fly" then
-        -- Add Fly functionality (example)
-        print("Fly activated with speed: " .. args[2])
-    elseif cmd == "/noclip" then
-        -- Add Noclip functionality (example)
-        print("Noclip activated")
-    elseif cmd == "/godmode" then
-        -- Add Godmode functionality (example)
-        print("Godmode activated")
-    elseif cmd == "/spawn" then
-        -- Add Spawn functionality (example)
-        print("Spawning item: " .. args[2])
-    elseif cmd == "/scriptinfo" then
-        -- Show info about the script
-        print("Script Info: This script contains several commands such as /fly, /noclip, /godmode, /spawn, and more.")
-    elseif cmd == "/discord" then
-        -- Open Discord link
-        print("Discord link: " .. discordLink)
-    elseif cmd == "/kick" then
-        -- Kick a player (example)
-        local playerName = args[2]
-        if playerName then
-            local playerToKick = game.Players:FindFirstChild(playerName)
-            if playerToKick then
-                playerToKick:Kick("You have been kicked by TrollHub admin!")
-            end
-        end
+local function fly()
+    local character = game.Players.LocalPlayer.Character
+    local humanoid = character:FindFirstChild("Humanoid")
+    local bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(10000, 10000, 10000)
+    bodyVelocity.Velocity = Vector3.new(0, flySpeed, 0)
+
+    if not flying then
+        flying = true
+        bodyVelocity.Parent = character.HumanoidRootPart
+        humanoid.PlatformStand = true
+    else
+        flying = false
+        bodyVelocity.Parent = nil
+        humanoid.PlatformStand = false
     end
 end
 
--- Listen for commands in the chat
-game.Players.LocalPlayer.Chatted:Connect(function(message)
-    if message:sub(1, 1) == "/" then
-        handleCommand(message)
+-- Noclip function
+local function noclip()
+    local character = game.Players.LocalPlayer.Character
+    local humanoid = character:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid:GetPropertyChangedSignal("FloorMaterial"):Connect(function()
+            if humanoid.FloorMaterial == Enum.Material.Air then
+                character:Move(Vector3.new(0, 10, 0))
+            end
+        end)
     end
-end)
+end
 
--- Toggle menu visibility with the semicolon key (";")
-game:GetService("UserInputService").InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.Semicolon then
-        if menuVisible then
-            menu:Destroy()
-        else
-            menu.Parent = game.Players.LocalPlayer.PlayerGui
-            menuVisible = true
+-- Godmode function
+local function godmode()
+    local character = game.Players.LocalPlayer.Character
+    if character then
+        local humanoid = character:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.Health = humanoid.MaxHealth
         end
     end
-end)
+end
+-- Create function for chat commands
+local function onChatMessage(message)
+    local args = string.split(message, " ")
+    local command = args[1]:lower()
 
--- On script load, display info in the output
-print("TrollHub loaded. Use commands like /fly, /noclip, /godmode, /spawn, /kick, /scriptinfo, and /discord.")
+    if command == "/fly" then
+        fly()  -- Toggle fly
+    elseif command == "/noclip" then
+        noclip()  -- Toggle noclip
+    elseif command == "/godmode" then
+        godmode()  -- Toggle godmode
+    elseif command == "/kick" then
+        local playerName = args[2]
+        local player = game.Players:FindFirstChild(playerName)
+        if player then
+            player:Kick("You have been kicked from the game!")
+        else
+            print("Player not found.")
+        end
+    elseif command == "/spawn" then
+        local itemName = args[2]
+        if itemName then
+            spawnItem(itemName)  -- Spawn item based on name
+        else
+            print("Please specify an item to spawn.")
+        end
+    elseif command == "/scriptinfo" then
+        openScriptInfo()  -- Show the script info menu
+    elseif command == "/discord" then
+        setclipboard(discordLink)
+        print("Discord link copied to clipboard: " .. discordLink)
+    else
+        print("Unknown command.")
+    end
+end
+
+-- Listen to chat messages
+game.Players.LocalPlayer.Chatted:Connect(onChatMessage)
+
+-- Function to spawn an item based on the name
+local function spawnItem(itemName)
+    -- Assuming items are stored in ReplicatedStorage or another location
+    local item = game.ReplicatedStorage:FindFirstChild(itemName)
+    if item then
+        local clone = item:Clone()
+        clone.Parent = game.Workspace
+        clone.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
+    else
+        print("Item not found in ReplicatedStorage.")
+    end
+end
+
+-- Function to open script info menu
+local function openScriptInfo()
+    -- Create a new frame for the script info
+    local infoFrame = Instance.new("Frame")
+    infoFrame.Size = UDim2.new(0, 400, 0, 300)
+    infoFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+    infoFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    infoFrame.BackgroundTransparency = 0.5
+    infoFrame.Parent = menu
+
+    -- Title label for script info
+    local infoLabel = Instance.new("TextLabel")
+    infoLabel.Size = UDim2.new(1, 0, 0, 50)
+    infoLabel.Text = "TrollHub Script Info"
+    infoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    infoLabel.TextSize = 24
+    infoLabel.TextAlignment = Enum.TextAlignment.Center
+    infoLabel.BackgroundTransparency = 1
+    infoLabel.Parent = infoFrame
+
+    -- TextBox for detailed command info
+    local infoTextBox = Instance.new("TextBox")
+    infoTextBox.Size = UDim2.new(1, 0, 0, 200)
+    infoTextBox.Position = UDim2.new(0, 0, 0.1, 0)
+    infoTextBox.Text = [[
+Commands:
+- /fly: Toggle flying mode (Press again to stop flying)
+- /noclip: Toggle noclip (Pass through walls)
+- /godmode: Enable or disable godmode (Invincibility)
+- /kick <playerName>: Kick a player from the game
+- /spawn <itemName>: Spawn an item in the game
+- /discord: Get the Discord link
+
+More commands coming soon!
+]]
+    infoTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    infoTextBox.TextSize = 14
+    infoTextBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    infoTextBox.BackgroundTransparency = 0.5
+    infoTextBox.TextWrapped = true
+    infoTextBox.Parent = infoFrame
+
+    -- Close button for the script info menu
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0, 50, 0, 30)
+    closeButton.Position = UDim2.new(1, -50, 0, 0)
+    closeButton.Text = "Close"
+    closeButton.Parent = infoFrame
+
+    closeButton.MouseButton1Click:Connect(function()
+        infoFrame:Destroy()
+    end)
+end
