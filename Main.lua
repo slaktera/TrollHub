@@ -111,6 +111,21 @@ local function executeCommand(command)
 
     elseif command:sub(1, 8) == "/discord" then
         player:SendMessage("Join our Discord: https://discord.gg/uX6tAfBdpQ")
+        
+    -- New Banning Command
+    elseif command:sub(1, 5) == "/ban " then
+        local playerName = command:sub(6)
+        local targetPlayer = game.Players:FindFirstChild(playerName)
+
+        if targetPlayer then
+            -- Banning Player: Kick from game
+            targetPlayer:Kick("You have been banned from the game.")
+            -- Optionally, you could also log this information or add an actual permanent ban system (requires database)
+            player:SendMessage(playerName .. " has been banned from the game.")
+        else
+            player:SendMessage("Player not found.")
+        end
+
     elseif command:sub(1, 11) == "/scriptinfo" then
         -- Show script info
         local infoFrame = Instance.new("Frame")
@@ -128,7 +143,8 @@ local function executeCommand(command)
             "/kick <PlayerID> - Kick player by Roblox ID\n" ..
             "/discord - Join the Discord\n" ..
             "/scriptinfo - Show script info\n" ..
-            "/spawn <item> - Spawn an item"
+            "/spawn <item> - Spawn an item\n" ..
+            "/ban <playerName> - Ban a player from the game"
         infoText.TextWrapped = true
         infoText.Parent = infoFrame
 
@@ -161,4 +177,3 @@ game:GetService("UserInputService").InputBegan:Connect(function(input)
         menuFrame.Visible = not menuFrame.Visible
     end
 end)
-
