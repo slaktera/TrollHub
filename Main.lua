@@ -1,186 +1,151 @@
--- Create the main frame for the menu
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "TrollHubMenu"
-screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
--- Create the menu frame
-local menuFrame = Instance.new("Frame")
-menuFrame.Name = "MenuFrame"
-menuFrame.Size = UDim2.new(0, 300, 0, 400)
-menuFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
-menuFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-menuFrame.BorderSizePixel = 0
-menuFrame.BackgroundTransparency = 0.2
-menuFrame.Parent = screenGui
-
--- Title bar at the top of the menu
-local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 30)
-titleBar.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
-titleBar.BorderSizePixel = 0
-titleBar.Parent = menuFrame
-
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Text = "TrollHub"
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.TextSize = 18
-titleLabel.Size = UDim2.new(1, 0, 1, 0)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Parent = titleBar
-
--- Close button
-local closeButton = Instance.new("TextButton")
-closeButton.Text = "X"
-closeButton.TextColor3 = Color3.fromRGB(255, 0, 0)
-closeButton.Size = UDim2.new(0, 30, 1, 0)
-closeButton.Position = UDim2.new(1, -30, 0, 0)
-closeButton.BackgroundTransparency = 1
-closeButton.Parent = titleBar
-closeButton.MouseButton1Click:Connect(function()
-    menuFrame:Destroy()
-end)
-
--- Drag functionality
-local dragging = false
-local dragInput, dragStart, startPos
-
-local function updateDrag(input)
-    local delta = input.Position - dragStart
-    menuFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-end
-
-local function onDragEnd()
-    dragging = false
-end
-
-local function onDrag(input)
-    if dragging then
-        updateDrag(input)
-    end
-end
-
-local function onDragStart(input)
-    dragging = true
-    dragStart = input.Position
-    startPos = menuFrame.Position
-end
-
--- Connect drag events
-titleBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        onDragStart(input)
-    end
-end)
-
-titleBar.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        onDrag(input)
-    end
-end)
-
-titleBar.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        onDragEnd()
-    end
-end)
-
--- Input box for commands
-local inputBox = Instance.new("TextBox")
-inputBox.PlaceholderText = "Enter Command..."
-inputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-inputBox.TextSize = 14
-inputBox.Size = UDim2.new(0, 260, 0, 30)
-inputBox.Position = UDim2.new(0, 20, 0, 70)
-inputBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-inputBox.BorderSizePixel = 0
-inputBox.Parent = menuFrame
-
--- Suggestions box
-local suggestionsBox = Instance.new("TextLabel")
-suggestionsBox.Text = "Suggestions: /fly, /noclip, /kick"
-suggestionsBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-suggestionsBox.TextSize = 12
-suggestionsBox.Size = UDim2.new(0, 260, 0, 30)
-suggestionsBox.Position = UDim2.new(0, 20, 0, 110)
-suggestionsBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-suggestionsBox.BackgroundTransparency = 0.3
-suggestionsBox.BorderSizePixel = 0
-suggestionsBox.Parent = menuFrame
-
--- Button to execute the command
-local executeButton = Instance.new("TextButton")
-executeButton.Text = "Execute"
-executeButton.Size = UDim2.new(0, 260, 0, 30)
-executeButton.Position = UDim2.new(0, 20, 0, 150)
-executeButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-executeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-executeButton.TextSize = 14
-executeButton.BorderSizePixel = 0
-executeButton.Parent = menuFrame
-
--- Command list
-local commandList = {"/fly", "/noclip", "/kick", "/ban", "/spawn", "/discord", "/scriptinfo"}
-
--- Handle input and show suggestions as you type
-inputBox.FocusChanged:Connect(function()
-    local input = inputBox.Text:lower():trim()
-
-    -- Show suggestions
-    local suggestions = {}
-    for _, command in ipairs(commandList) do
-        if command:find(input, 1, true) then
-            table.insert(suggestions, command)
-        end
-    end
-    suggestionsBox.Text = "Suggestions: " .. table.concat(suggestions, ", ")
-end)
-
--- Handle command execution
-executeButton.MouseButton1Click:Connect(function()
-    local input = inputBox.Text:lower():trim()
-
-    if input == "/fly" then
-        print("Fly command activated!")
-    elseif input == "/noclip" then
-        print("Noclip command activated!")
-    elseif input == "/kick" then
-        print("Kick command activated!")
-    elseif input == "/ban" then
-        print("Ban command activated!")
-    elseif input == "/spawn" then
-        print("Spawn command activated!")
-    elseif input == "/discord" then
-        print("Opening Discord link...")
-        -- Open Discord link here
-    elseif input == "/scriptinfo" then
-        print("Script info activated!")
-        -- Show script info here
-    else
-        print("Unknown command")
-    end
-
-    -- Clear the input after execution
-    inputBox.Text = ""
-end)
-
-local WhitelistedUsers = {
-    [12345678] = true, -- Your Roblox userId
-    [98765432] = true  -- Other devs/admins
+-- TrollHub Admin System (Custom Version)
+local AuthorizedUsers = {
+    [YOUR_USER_ID_HERE] = true, -- Replace with your actual Roblox User ID
 }
 
-game.Players.PlayerAdded:Connect(function(player)
-    if WhitelistedUsers[player.UserId] then
-        player:SetAttribute("Bypass", true)
+if not AuthorizedUsers[game.Players.LocalPlayer.UserId] then
+    warn("Not authorized to run TrollHub.")
+    return
+end
+
+-- UI Creation
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "TrollHubUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = game.CoreGui
+
+local CommandBar = Instance.new("TextBox")
+CommandBar.Size = UDim2.new(0, 400, 0, 40)
+CommandBar.Position = UDim2.new(0.5, -200, 0, 10)
+CommandBar.PlaceholderText = "Type /command here"
+CommandBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+CommandBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+CommandBar.Font = Enum.Font.Gotham
+CommandBar.TextSize = 18
+CommandBar.ClearTextOnFocus = false
+CommandBar.Draggable = true
+CommandBar.Active = true
+CommandBar.Selectable = true
+CommandBar.Parent = ScreenGui
+-- Utilities
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local flying = false
+local noclip = false
+local flySpeed = 50
+local BannedPlayers = {}
+
+local function fly(speed)
+    flying = true
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local root = char:WaitForChild("HumanoidRootPart")
+
+    local bodyGyro = Instance.new("BodyGyro", root)
+    bodyGyro.P = 9e4
+    bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+    bodyGyro.CFrame = root.CFrame
+
+    local bodyVelocity = Instance.new("BodyVelocity", root)
+    bodyVelocity.Velocity = Vector3.new(0,0.1,0)
+    bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+
+    RunService.RenderStepped:Connect(function()
+        if not flying then bodyGyro:Destroy(); bodyVelocity:Destroy() return end
+
+        local moveDirection = Vector3.new()
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + workspace.CurrentCamera.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection - workspace.CurrentCamera.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection - workspace.CurrentCamera.CFrame.RightVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + workspace.CurrentCamera.CFrame.RightVector end
+        moveDirection = moveDirection.Unit
+        bodyVelocity.Velocity = moveDirection * (speed or flySpeed)
+        bodyGyro.CFrame = workspace.CurrentCamera.CFrame
+    end)
+end
+
+local function toggleNoclip()
+    noclip = not noclip
+    RunService.Stepped:Connect(function()
+        if noclip and LocalPlayer.Character then
+            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end)
+end
+
+local function runCommand(text)
+    local args = text:split(" ")
+    local cmd = args[1]:lower()
+
+    if cmd == "/fly" then
+        flySpeed = tonumber(args[2]) or 50
+        fly(flySpeed)
+    elseif cmd == "/unfly" then
+        flying = false
+    elseif cmd == "/noclip" then
+        toggleNoclip()
+    elseif cmd == "/kick" and args[2] then
+        local target = Players:FindFirstChild(args[2])
+        if target then target:Kick("You were kicked by TrollHub.") end
+    elseif cmd == "/ban" and args[2] then
+        local target = Players:FindFirstChild(args[2])
+        if target then
+            BannedPlayers[target.UserId] = true
+            target:Kick("You were banned by TrollHub.")
+        end
+    elseif cmd == "/announce" and args[2] then
+        local msg = table.concat(args, " ", 2)
+        game.StarterGui:SetCore("ChatMakeSystemMessage", {
+            Text = "[System]: " .. msg,
+            Color = Color3.fromRGB(255, 100, 100),
+            Font = Enum.Font.SourceSansBold,
+            TextSize = 18
+        })
+    elseif cmd == "/scriptinfo" then
+        local InfoFrame = Instance.new("TextLabel")
+        InfoFrame.Size = UDim2.new(0, 400, 0, 300)
+        InfoFrame.Position = UDim2.new(0.5, -200, 0.4, 0)
+        InfoFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+        InfoFrame.TextColor3 = Color3.new(1,1,1)
+        InfoFrame.TextWrapped = true
+        InfoFrame.TextSize = 16
+        InfoFrame.Font = Enum.Font.Gotham
+        InfoFrame.Text = "Commands:\n\n" ..
+            "/fly [speed] - Start flying\n" ..
+            "/unfly - Stop flying\n" ..
+            "/noclip - Toggle noclip\n" ..
+            "/kick [playerName] - Kick a player\n" ..
+            "/ban [playerName] - Ban a player\n" ..
+            "/announce [message] - Broadcast a system message\n" ..
+            "/scriptinfo - Show this info panel"
+        InfoFrame.Draggable = true
+        InfoFrame.Active = true
+        InfoFrame.Parent = ScreenGui
+
+        local Close = Instance.new("TextButton", InfoFrame)
+        Close.Size = UDim2.new(0, 40, 0, 25)
+        Close.Position = UDim2.new(1, -45, 0, 5)
+        Close.Text = "X"
+        Close.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+        Close.TextColor3 = Color3.new(1,1,1)
+        Close.MouseButton1Click:Connect(function()
+            InfoFrame:Destroy()
+        end)
     end
-end)
-if humanoid.WalkSpeed > 16 then
-    player:Kick("Speed hack detected")
 end
-if not player:GetAttribute("Bypass") and humanoid.WalkSpeed > 16 then
-    player:Kick("Speed hack detected")
-end
-remote.OnServerEvent:Connect(function(player, action)
-    if not player:GetAttribute("Bypass") then
-        -- validate "action"
+
+-- Execute command on Enter
+CommandBar.FocusLost:Connect(function(enter)
+    if enter and CommandBar.Text ~= "" then
+        pcall(function()
+            runCommand(CommandBar.Text)
+        end)
+        CommandBar.Text = ""
     end
 end)
