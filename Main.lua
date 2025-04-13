@@ -9,29 +9,7 @@ local admins = {
 
 -- Admin Commands
 local commands = {
-    ["ban"] = function(player, targetName)
-        for _, target in pairs(game.Players:GetPlayers()) do
-            if target.Name:lower() == targetName:lower() then
-                target:Kick("You have been banned by an admin.")
-                print(target.Name .. " has been banned.")
-            end
-        end
-    end,
-
-    ["spawn"] = function(player, itemName)
-        local item = game.ReplicatedStorage:FindFirstChild(itemName)
-        if item then
-            local newItem = item:Clone()
-            newItem.Parent = workspace
-            newItem.Position = player.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
-            print(itemName .. " spawned for " .. player.Name)
-        else
-            print("Item not found: " .. itemName)
-        end
-    end,
-
     ["fly"] = function(player)
-        -- Example Fly Command
         local char = player.Character
         if char and char:FindFirstChild("HumanoidRootPart") then
             local bodyVelocity = Instance.new("BodyVelocity")
@@ -42,6 +20,36 @@ local commands = {
             bodyVelocity:Destroy()
         end
     end,
+
+    ["kick"] = function(player, targetName)
+        for _, target in pairs(game.Players:GetPlayers()) do
+            if target.Name:lower() == targetName:lower() then
+                target:Kick("You have been kicked by an admin.")
+                print(target.Name .. " has been kicked.")
+            end
+        end
+    end,
+
+    ["ban"] = function(player, targetName)
+        for _, target in pairs(game.Players:GetPlayers()) do
+            if target.Name:lower() == targetName:lower() then
+                target:Kick("You have been banned by an admin.")
+                print(target.Name .. " has been banned.")
+            end
+        end
+    end,
+
+    ["noclip"] = function(player)
+        local char = player.Character
+        if char then
+            for _, part in pairs(char:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+            print(player.Name .. " is now noclipping.")
+        end
+    end
 }
 
 -- Utility Functions
@@ -54,12 +62,11 @@ local function isAdmin(player)
     return false
 end
 
--- Command Handler
 local function handleCommand(player, command, args)
     if commands[command] then
         commands[command](player, unpack(args))
     else
-        player:Kick("Invalid command: " .. command)
+        print("Invalid command: " .. command)
     end
 end
 
@@ -71,24 +78,32 @@ local function createAdminUI(player)
     local frame = Instance.new("Frame")
     local commandBox = Instance.new("TextBox")
     local executeButton = Instance.new("TextButton")
+    local closeButton = Instance.new("TextButton")
 
     screenGui.Name = "AdminMenu"
     screenGui.Parent = player.PlayerGui
 
-    frame.Position = UDim2.new(0.5, -100, 0.5, -50)
-    frame.Size = UDim2.new(0, 200, 0, 100)
+    frame.Position = UDim2.new(0.3, 0, 0.3, 0)
+    frame.Size = UDim2.new(0, 400, 0, 200)
     frame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+    frame.Active = true
+    frame.Draggable = true
     frame.Parent = screenGui
 
-    commandBox.Position = UDim2.new(0, 10, 0, 10)
-    commandBox.Size = UDim2.new(0, 180, 0, 30)
-    commandBox.PlaceholderText = "Enter command"
+    commandBox.Position = UDim2.new(0.1, 0, 0.2, 0)
+    commandBox.Size = UDim2.new(0.8, 0, 0.2, 0)
+    commandBox.PlaceholderText = "Enter command (e.g., fly, kick PlayerName)"
     commandBox.Parent = frame
 
-    executeButton.Position = UDim2.new(0, 10, 0, 50)
-    executeButton.Size = UDim2.new(0, 180, 0, 30)
+    executeButton.Position = UDim2.new(0.1, 0, 0.5, 0)
+    executeButton.Size = UDim2.new(0.35, 0, 0.2, 0)
     executeButton.Text = "Execute"
     executeButton.Parent = frame
+
+    closeButton.Position = UDim2.new(0.55, 0, 0.5, 0)
+    closeButton.Size = UDim2.new(0.35, 0, 0.2, 0)
+    closeButton.Text = "Close"
+    closeButton.Parent = frame
 
     executeButton.MouseButton1Click:Connect(function()
         local text = commandBox.Text
@@ -97,11 +112,21 @@ local function createAdminUI(player)
         local args = {unpack(split, 2)}
         handleCommand(player, command, args)
     end)
+
+    closeButton.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
 end
 
--- Player Added Event
+-- Hotkey to Open Admin Menu
 game.Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
-        createAdminUI(player)
+        local userInputService = game:GetService("UserInputService")
+        userInputService.InputBegan:Connect(function(input, gameProcessed)
+            if gameProcessed then return end
+            if input.KeyCode == Enum.KeyCode.Semicolon then -- Hotkey to open menu
+                createAdminUI(player)
+            end
+        end)
     end)
 end)
