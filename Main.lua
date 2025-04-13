@@ -1,151 +1,103 @@
--- TrollHub Admin System (Custom Version)
-local AuthorizedUsers = {
-    [YOUR_USER_ID_HERE] = true, -- Replace with your actual Roblox User ID
-}
+-- Initialize Roblox services
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
-if not AuthorizedUsers[game.Players.LocalPlayer.UserId] then
-    warn("Not authorized to run TrollHub.")
-    return
-end
+-- Create the main UI Frame (menu)
+local menu = Instance.new("Frame")
+menu.Size = UDim2.new(0, 400, 0, 300)
+menu.Position = UDim2.new(0.5, -200, 0.5, -150)
+menu.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+menu.BackgroundTransparency = 0.5
+menu.BorderSizePixel = 0
+menu.Visible = false
+menu.Parent = playerGui
 
--- UI Creation
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "TrollHubUI"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = game.CoreGui
+-- Create a custom background with the Solo Leveling theme (image ID)
+local background = Instance.new("ImageLabel")
+background.Size = UDim2.new(1, 0, 1, 0)
+background.Position = UDim2.new(0, 0, 0, 0)
+background.BackgroundTransparency = 1
+background.Image = "rbxassetid://YOUR_IMAGE_ID"  -- Replace with the image ID of Sung Jinwoo
+background.Parent = menu
 
-local CommandBar = Instance.new("TextBox")
-CommandBar.Size = UDim2.new(0, 400, 0, 40)
-CommandBar.Position = UDim2.new(0.5, -200, 0, 10)
-CommandBar.PlaceholderText = "Type /command here"
-CommandBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-CommandBar.TextColor3 = Color3.fromRGB(255, 255, 255)
-CommandBar.Font = Enum.Font.Gotham
-CommandBar.TextSize = 18
-CommandBar.ClearTextOnFocus = false
-CommandBar.Draggable = true
-CommandBar.Active = true
-CommandBar.Selectable = true
-CommandBar.Parent = ScreenGui
--- Utilities
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
+-- Create the command bar
+local commandBar = Instance.new("TextBox")
+commandBar.Size = UDim2.new(1, 0, 0, 30)
+commandBar.Position = UDim2.new(0, 0, 0, 0)
+commandBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+commandBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+commandBar.PlaceholderText = "Enter Command..."
+commandBar.ClearTextOnFocus = false
+commandBar.TextScaled = true
+commandBar.Parent = menu
 
-local flying = false
-local noclip = false
-local flySpeed = 50
-local BannedPlayers = {}
+-- Create a close button for the menu
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 50, 0, 30)
+closeButton.Position = UDim2.new(1, -50, 0, 0)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.Text = "Close"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Parent = menu
 
-local function fly(speed)
-    flying = true
-    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    local root = char:WaitForChild("HumanoidRootPart")
+-- Create a function to close the menu
+closeButton.MouseButton1Click:Connect(function()
+    menu.Visible = false
+end)
 
-    local bodyGyro = Instance.new("BodyGyro", root)
-    bodyGyro.P = 9e4
-    bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-    bodyGyro.CFrame = root.CFrame
+-- Function to toggle the menu with the Insert key
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.Insert then
+        menu.Visible = not menu.Visible
+    end
+end)
 
-    local bodyVelocity = Instance.new("BodyVelocity", root)
-    bodyVelocity.Velocity = Vector3.new(0,0.1,0)
-    bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-
-    RunService.RenderStepped:Connect(function()
-        if not flying then bodyGyro:Destroy(); bodyVelocity:Destroy() return end
-
-        local moveDirection = Vector3.new()
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + workspace.CurrentCamera.CFrame.LookVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection - workspace.CurrentCamera.CFrame.LookVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection - workspace.CurrentCamera.CFrame.RightVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + workspace.CurrentCamera.CFrame.RightVector end
-        moveDirection = moveDirection.Unit
-        bodyVelocity.Velocity = moveDirection * (speed or flySpeed)
-        bodyGyro.CFrame = workspace.CurrentCamera.CFrame
-    end)
-end
-
-local function toggleNoclip()
-    noclip = not noclip
-    RunService.Stepped:Connect(function()
-        if noclip and LocalPlayer.Character then
-            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                end
-            end
-        end
-    end)
-end
-
-local function runCommand(text)
-    local args = text:split(" ")
-    local cmd = args[1]:lower()
-
-    if cmd == "/fly" then
-        flySpeed = tonumber(args[2]) or 50
-        fly(flySpeed)
-    elseif cmd == "/unfly" then
-        flying = false
-    elseif cmd == "/noclip" then
-        toggleNoclip()
-    elseif cmd == "/kick" and args[2] then
-        local target = Players:FindFirstChild(args[2])
-        if target then target:Kick("You were kicked by TrollHub.") end
-    elseif cmd == "/ban" and args[2] then
-        local target = Players:FindFirstChild(args[2])
-        if target then
-            BannedPlayers[target.UserId] = true
-            target:Kick("You were banned by TrollHub.")
-        end
-    elseif cmd == "/announce" and args[2] then
-        local msg = table.concat(args, " ", 2)
-        game.StarterGui:SetCore("ChatMakeSystemMessage", {
-            Text = "[System]: " .. msg,
-            Color = Color3.fromRGB(255, 100, 100),
-            Font = Enum.Font.SourceSansBold,
-            TextSize = 18
-        })
-    elseif cmd == "/scriptinfo" then
-        local InfoFrame = Instance.new("TextLabel")
-        InfoFrame.Size = UDim2.new(0, 400, 0, 300)
-        InfoFrame.Position = UDim2.new(0.5, -200, 0.4, 0)
-        InfoFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
-        InfoFrame.TextColor3 = Color3.new(1,1,1)
-        InfoFrame.TextWrapped = true
-        InfoFrame.TextSize = 16
-        InfoFrame.Font = Enum.Font.Gotham
-        InfoFrame.Text = "Commands:\n\n" ..
-            "/fly [speed] - Start flying\n" ..
-            "/unfly - Stop flying\n" ..
-            "/noclip - Toggle noclip\n" ..
-            "/kick [playerName] - Kick a player\n" ..
-            "/ban [playerName] - Ban a player\n" ..
-            "/announce [message] - Broadcast a system message\n" ..
-            "/scriptinfo - Show this info panel"
-        InfoFrame.Draggable = true
-        InfoFrame.Active = true
-        InfoFrame.Parent = ScreenGui
-
-        local Close = Instance.new("TextButton", InfoFrame)
-        Close.Size = UDim2.new(0, 40, 0, 25)
-        Close.Position = UDim2.new(1, -45, 0, 5)
-        Close.Text = "X"
-        Close.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-        Close.TextColor3 = Color3.new(1,1,1)
-        Close.MouseButton1Click:Connect(function()
-            InfoFrame:Destroy()
+-- Function to move the menu (draggable)
+local dragging, dragInput, dragStart, startPos
+menu.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = menu.Position
+        input.Changed:Connect(function()
+            if not dragging then return end
+            local delta = input.Position - dragStart
+            menu.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end)
     end
-end
+end)
 
--- Execute command on Enter
-CommandBar.FocusLost:Connect(function(enter)
-    if enter and CommandBar.Text ~= "" then
-        pcall(function()
-            runCommand(CommandBar.Text)
-        end)
-        CommandBar.Text = ""
+menu.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+-- Setup autocomplete for commands (simple example, more commands can be added)
+local commands = {
+    "/fly", "/noclip", "/kick", "/ban", "/announce", "/scriptinfo"
+}
+
+commandBar.FocusLost:Connect(function()
+    local enteredText = commandBar.Text
+    if table.find(commands, enteredText) then
+        print("Executing command: " .. enteredText)
+        -- Here you can handle the specific command actions
+        if enteredText == "/fly" then
+            -- Add fly logic
+            print("Fly command executed!")
+        elseif enteredText == "/noclip" then
+            -- Add noclip logic
+            print("NoClip command executed!")
+        elseif enteredText == "/kick" then
+            -- Add kick player logic
+            print("Kick command executed!")
+        elseif enteredText == "/ban" then
+            -- Add ban player logic
+            print("Ban command executed!")
+        end
+    else
+        print("Unknown command: " .. enteredText)
     end
 end)
