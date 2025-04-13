@@ -1,6 +1,7 @@
 -- Initialize Roblox services
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+local userInputService = game:GetService("UserInputService")
 
 -- Create the main UI Frame (menu)
 local menu = Instance.new("Frame")
@@ -46,7 +47,7 @@ closeButton.MouseButton1Click:Connect(function()
 end)
 
 -- Function to toggle the menu with the Insert key
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+userInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.Insert then
         menu.Visible = not menu.Visible
