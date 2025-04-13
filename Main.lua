@@ -1,20 +1,32 @@
+-- Script for Menu
+
 -- Create the ScreenGui and Menu
 local screenGui = Instance.new("ScreenGui")
 local frame = Instance.new("Frame")
 local closeButton = Instance.new("TextButton")
+local title = Instance.new("TextLabel")
+local dragInput, dragStart, startPos
 
 -- Set up the ScreenGui and Frame
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-frame.Size = UDim2.new(0, 300, 0, 400)
-frame.Position = UDim2.new(0.5, -150, 0.5, -200)
-frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-frame.BackgroundTransparency = 0.5
+frame.Size = UDim2.new(0, 400, 0, 500)
+frame.Position = UDim2.new(0.5, -200, 0.5, -250)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.BackgroundTransparency = 0.2
 frame.Parent = screenGui
 frame.Visible = false
 
+-- Title text for the menu
+title.Size = UDim2.new(1, 0, 0, 50)
+title.Text = "TrollHub Menu"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 20
+title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+title.Parent = frame
+
 -- Create a button to close the menu
 closeButton.Size = UDim2.new(0, 50, 0, 50)
-closeButton.Position = UDim2.new(0.5, -25, 0, -100)
+closeButton.Position = UDim2.new(1, -60, 0, 0)
 closeButton.Text = "Close"
 closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 closeButton.Parent = frame
@@ -30,93 +42,40 @@ closeButton.MouseButton1Click:Connect(function()
     menuOpen = not menuOpen
 end)
 
--- Listen for the '/kick' command
-game:GetService("Players").PlayerAdded:Connect(function(player)
-    player.Chatted:Connect(function(message)
-        -- Kick player command
-        if message:sub(1, 5) == "/kick" then
-            local playerId = message:sub(7)
-            local playerToKick = game:GetService("Players"):GetPlayerByUserId(tonumber(playerId))
-            
-            if playerToKick then
-                playerToKick:Kick("You have been kicked by a server admin.")
-            else
-                player:SendMessage("Player not found.")
+-- Dragging Functionality
+local function update(input)
+    local delta = input.Position - dragStart
+    frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+local function onInputBegan(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragStart = input.Position
+        startPos = frame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                update(input)
             end
-        end
-
-        -- Discord link command
-        if message:sub(1, 7) == "/discord" then
-            game:GetService("Players").LocalPlayer:SendMessage("Join the Discord: https://discord.gg/uX6tAfBdpQ")
-        end
-
-        -- Script info command
-        if message:sub(1, 11) == "/scriptinfo" then
-            local infoFrame = Instance.new("Frame")
-            infoFrame.Size = UDim2.new(0, 400, 0, 200)
-            infoFrame.Position = UDim2.new(0.5, -200, 0.5, -100)
-            infoFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            infoFrame.Parent = screenGui
-
-            local infoText = Instance.new("TextLabel")
-            infoText.Size = UDim2.new(0, 380, 0, 180)
-            infoText.Position = UDim2.new(0, 10, 0, 10)
-            infoText.Text = "Commands List:\n" ..
-                "/kick <PlayerID> - Kick player by Roblox ID\n" ..
-                "/discord - Join the Discord\n" ..
-                "/scriptinfo - Show script commands\n"
-            infoText.TextWrapped = true
-            infoText.Parent = infoFrame
-
-            -- Create a close button for the info frame
-            local infoCloseButton = Instance.new("TextButton")
-            infoCloseButton.Size = UDim2.new(0, 50, 0, 30)
-            infoCloseButton.Position = UDim2.new(1, -60, 0, 10)
-            infoCloseButton.Text = "Close"
-            infoCloseButton.Parent = infoFrame
-
-            infoCloseButton.MouseButton1Click:Connect(function()
-                infoFrame:Destroy()
-            end)
-        end
-    end)
-end)
-
--- Create the fly command
-local flySpeed = 50
-local flying = false
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-
-game:GetService("Players").LocalPlayer.Chatted:Connect(function(message)
-    if message:sub(1, 4) == "/fly" then
-        local speed = tonumber(message:sub(6)) or flySpeed
-        if not flying then
-            flying = true
-            local bodyVelocity = Instance.new("BodyVelocity")
-            bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
-            bodyVelocity.Velocity = Vector3.new(0, speed, 0)
-            bodyVelocity.Parent = character:WaitForChild("HumanoidRootPart")
-            game:GetService("RunService").Heartbeat:Connect(function()
-                if flying then
-                    bodyVelocity.Velocity = Vector3.new(0, speed, 0)
-                end
-            end)
-        else
-            flying = false
-            for _, v in ipairs(character:GetChildren()) do
-                if v:IsA("BodyVelocity") then
-                    v:Destroy()
-                end
-            end
-        end
+        end)
     end
-end)
+end
 
--- Create the noclip command
-game:GetService("Players").LocalPlayer.Chatted:Connect(function(message)
-    if message:sub(1, 7) == "/noclip" then
-        local char = player.Character or player.CharacterAdded:Wait()
+frame.InputBegan:Connect(onInputBegan)
+
+-- Commands List
+local function executeCommand(message)
+    if message:sub(1, 4) == "/fly" then
+        local speed = tonumber(message:sub(6)) or 50
+        local character = game.Players.LocalPlayer.Character
+        local bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+        bodyVelocity.Velocity = Vector3.new(0, speed, 0)
+        bodyVelocity.Parent = character.HumanoidRootPart
+        game:GetService("RunService").Heartbeat:Connect(function()
+            bodyVelocity.Velocity = Vector3.new(0, speed, 0)
+        end)
+    elseif message:sub(1, 7) == "/noclip" then
+        local char = game.Players.LocalPlayer.Character
         local humanoid = char:WaitForChild("Humanoid")
         local bodyParts = char:GetChildren()
         for _, part in ipairs(bodyParts) do
@@ -126,15 +85,28 @@ game:GetService("Players").LocalPlayer.Chatted:Connect(function(message)
         end
         humanoid:ChangeState(Enum.HumanoidStateType.Physics)
         humanoid.PlatformStand = true
-    end
-end)
-
--- Create the spawn items command
-game:GetService("Players").LocalPlayer.Chatted:Connect(function(message)
-    if message:sub(1, 7) == "/spawn" then
-        local item = message:sub(9)
-        local clone = game.ReplicatedStorage:WaitForChild(item):Clone()
-        clone.Parent = workspace
-    end
-end)
-
+    elseif message:sub(1, 7) == "/kick" then
+        local playerID = message:sub(9)
+        local playerToKick = game.Players:GetPlayerByUserId(tonumber(playerID))
+        if playerToKick then
+            playerToKick:Kick("You have been kicked.")
+        else
+            game.Players.LocalPlayer:SendMessage("Player not found.")
+        end
+    elseif message:sub(1, 7) == "/spawn" then
+        local itemName = message:sub(9)
+        local item = game.ReplicatedStorage:FindFirstChild(itemName)
+        if item then
+            item:Clone().Parent = workspace
+        else
+            game.Players.LocalPlayer:SendMessage("Item not found.")
+        end
+    elseif message:sub(1, 8) == "/discord" then
+        game.Players.LocalPlayer:SendMessage("Join the Discord: https://discord.gg/uX6tAfBdpQ")
+    elseif message:sub(1, 11) == "/scriptinfo" then
+        -- Show script info in a draggable frame
+        local infoFrame = Instance.new("Frame")
+        infoFrame.Size = UDim2.new(0, 400, 0, 200)
+        infoFrame.Position = UDim2.new(0.5, -200, 0.5, -100)
+        infoFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        infoFrame.Parent = screenGui
