@@ -1,11 +1,13 @@
--- Script for Menu
+-- Script for Menu and Command Input Bar
 
 -- Create the ScreenGui and Menu
 local screenGui = Instance.new("ScreenGui")
 local frame = Instance.new("Frame")
 local closeButton = Instance.new("TextButton")
 local title = Instance.new("TextLabel")
-local dragInput, dragStart, startPos
+local commandInputBar = Instance.new("TextBox")
+local submitButton = Instance.new("TextButton")
+local menuOpen = false
 
 -- Set up the ScreenGui and Frame
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -32,7 +34,6 @@ closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 closeButton.Parent = frame
 
 -- Function to toggle the visibility of the menu
-local menuOpen = false
 closeButton.MouseButton1Click:Connect(function()
     if menuOpen then
         frame.Visible = false
@@ -42,7 +43,22 @@ closeButton.MouseButton1Click:Connect(function()
     menuOpen = not menuOpen
 end)
 
--- Dragging Functionality
+-- Command Input Bar
+commandInputBar.Size = UDim2.new(0, 300, 0, 50)
+commandInputBar.Position = UDim2.new(0, 50, 0, 400)
+commandInputBar.PlaceholderText = "Type command here..."
+commandInputBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+commandInputBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+commandInputBar.Parent = frame
+
+-- Submit Button to execute command
+submitButton.Size = UDim2.new(0, 80, 0, 50)
+submitButton.Position = UDim2.new(1, -120, 0, 400)
+submitButton.Text = "Submit"
+submitButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+submitButton.Parent = frame
+
+-- Dragging Functionality for the menu
 local function update(input)
     local delta = input.Position - dragStart
     frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
@@ -62,7 +78,7 @@ end
 
 frame.InputBegan:Connect(onInputBegan)
 
--- Commands List
+-- Commands List and Execution
 local function executeCommand(message)
     if message:sub(1, 4) == "/fly" then
         local speed = tonumber(message:sub(6)) or 50
@@ -110,3 +126,37 @@ local function executeCommand(message)
         infoFrame.Position = UDim2.new(0.5, -200, 0.5, -100)
         infoFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         infoFrame.Parent = screenGui
+
+        local infoText = Instance.new("TextLabel")
+        infoText.Size = UDim2.new(0, 380, 0, 180)
+        infoText.Position = UDim2.new(0, 10, 0, 10)
+        infoText.Text = "Commands List:\n" ..
+            "/fly <speed> - Fly at a specified speed\n" ..
+            "/noclip - Enable noclip mode\n" ..
+            "/kick <PlayerID> - Kick player by Roblox ID\n" ..
+            "/discord - Join the Discord\n" ..
+            "/scriptinfo - Show script info\n" ..
+            "/spawn <item> - Spawn an item"
+        infoText.TextWrapped = true
+        infoText.Parent = infoFrame
+
+        -- Close button for script info
+        local closeInfoButton = Instance.new("TextButton")
+        closeInfoButton.Size = UDim2.new(0, 50, 0, 30)
+        closeInfoButton.Position = UDim2.new(1, -60, 0, 10)
+        closeInfoButton.Text = "Close"
+        closeInfoButton.Parent = infoFrame
+
+        closeInfoButton.MouseButton1Click:Connect(function()
+            infoFrame:Destroy()
+        end)
+    end
+end
+
+submitButton.MouseButton1Click:Connect(function()
+    local message = commandInputBar.Text
+    executeCommand(message)
+    commandInputBar.Text = ""
+end)
+
+game:GetService("Players").LocalPlayer.Chatted:Connect(executeCommand)
