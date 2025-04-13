@@ -41,15 +41,26 @@ HintLabel.TextSize = 16
 HintLabel.Visible = false
 HintLabel.Parent = ScreenGui
 
--- Script Info Window
-local ScriptInfoWindow = Instance.new("Frame")
-ScriptInfoWindow.Size = UDim2.new(0, 400, 0, 300)
-ScriptInfoWindow.Position = UDim2.new(0.5, -200, 0.5, -150)
-ScriptInfoWindow.AnchorPoint = Vector2.new(0.5, 0.5)
-ScriptInfoWindow.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-ScriptInfoWindow.Visible = false
-ScriptInfoWindow.Parent = ScreenGui
+-- Main Menu Window
+local MainMenu = Instance.new("Frame")
+MainMenu.Size = UDim2.new(0, 400, 0, 400)
+MainMenu.Position = UDim2.new(0.5, -200, 0.5, -200)
+MainMenu.AnchorPoint = Vector2.new(0.5, 0.5)
+MainMenu.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MainMenu.Visible = false
+MainMenu.Parent = ScreenGui
 
+local MainMenuCloseButton = Instance.new("TextButton")
+MainMenuCloseButton.Size = UDim2.new(0, 100, 0, 30)
+MainMenuCloseButton.Position = UDim2.new(1, -110, 0, 10)
+MainMenuCloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+MainMenuCloseButton.Text = "Close"
+MainMenuCloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+MainMenuCloseButton.Font = Enum.Font.Code
+MainMenuCloseButton.TextSize = 16
+MainMenuCloseButton.Parent = MainMenu
+
+-- Script Info Window Inside the Main Menu
 local ScriptInfoText = Instance.new("TextLabel")
 ScriptInfoText.Size = UDim2.new(1, 0, 1, 0)
 ScriptInfoText.Text = "Loading script info..."
@@ -59,21 +70,29 @@ ScriptInfoText.TextSize = 16
 ScriptInfoText.TextWrapped = true
 ScriptInfoText.TextYAlignment = Enum.TextYAlignment.Top
 ScriptInfoText.BackgroundTransparency = 1
-ScriptInfoText.Parent = ScriptInfoWindow
+ScriptInfoText.Parent = MainMenu
 
--- Add a close button for the Script Info window
-local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 100, 0, 30)
-CloseButton.Position = UDim2.new(1, -110, 0, 10)
-CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-CloseButton.Text = "Close"
-CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseButton.Font = Enum.Font.Code
-CloseButton.TextSize = 16
-CloseButton.Parent = ScriptInfoWindow
+-- Add Script Info Button
+local ScriptInfoButton = Instance.new("TextButton")
+ScriptInfoButton.Size = UDim2.new(0, 200, 0, 30)
+ScriptInfoButton.Position = UDim2.new(0.5, -100, 1, -40)
+ScriptInfoButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+ScriptInfoButton.Text = "Show Script Info"
+ScriptInfoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ScriptInfoButton.Font = Enum.Font.Code
+ScriptInfoButton.TextSize = 16
+ScriptInfoButton.Parent = MainMenu
 
-CloseButton.MouseButton1Click:Connect(function()
-    ScriptInfoWindow.Visible = false
+-- Close the Main Menu
+MainMenuCloseButton.MouseButton1Click:Connect(function()
+    MainMenu.Visible = false
+end)
+
+-- Open the Main Menu
+UIS.InputBegan:Connect(function(input, processed)
+    if input.KeyCode == Enum.KeyCode.Semicolon and not processed then
+        MainMenu.Visible = not MainMenu.Visible
+    end
 end)
 
 -- COMMAND HANDLER
@@ -156,13 +175,12 @@ local Commands = {
     ["scriptinfo"] = {
         Description = "Show script info about commands",
         Run = function()
-            -- Show the script info window
+            -- Show the script info window inside the menu
             local infoText = "Commands:\n"
             for name, data in pairs(Commands) do
                 infoText = infoText .. "/" .. name .. " - " .. data.Description .. "\n"
             end
             ScriptInfoText.Text = infoText
-            ScriptInfoWindow.Visible = true
         end
     }
 }
@@ -231,4 +249,3 @@ end)
 
 -- Debug Message
 print("Custom Command Script Loaded! Press ; to open.")
-
