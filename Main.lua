@@ -185,7 +185,7 @@ end)
 -- Adding background image (customizable for your theme)
 local background = Instance.new("ImageLabel")
 background.Size = UDim2.new(1, 0, 1, 0)
-background.Image = "rbxassetid://YOUR_IMAGE_ASSET_ID_HERE" -- replace with your image asset ID
+background.Image = "rbxassetid://10511856020" -- replace with your image asset ID
 background.BackgroundTransparency = 1
 background.Parent = ScreenGui
 
