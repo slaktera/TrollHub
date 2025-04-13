@@ -122,31 +122,69 @@ for i, command in ipairs(commands) do
     table.insert(buttons, button)
 end
 
--- Input handling for the TextBox
-inputBox.FocusLost:Connect(function(enterPressed)
-    if enterPressed then
-        local input = inputBox.Text:lower():trim()
+-- Create Execute Button
+local executeButton = Instance.new("TextButton")
+executeButton.Text = "Execute"
+executeButton.Size = UDim2.new(0, 260, 0, 30)
+executeButton.Position = UDim2.new(0, 20, 0, 310)
+executeButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- Green color for Execute button
+executeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+executeButton.TextSize = 14
+executeButton.BorderSizePixel = 0
+executeButton.Parent = menuFrame
 
-        -- Handle commands here, like "/fly", "/noclip", etc.
-        if input == "/fly" then
-            print("Fly command activated!")
-        elseif input == "/noclip" then
-            print("Noclip command activated!")
-        elseif input == "/kick" then
-            print("Kick command activated!")
-        elseif input == "/ban" then
-            print("Ban command activated!")
-        elseif input == "/spawn" then
-            print("Spawn command activated!")
-        elseif input == "/discord" then
-            print("Opening Discord link...")
-        elseif input == "/scriptinfo" then
-            print("Script info activated!")
-        else
-            print("Unknown command")
+-- Create suggestions box for commands
+local suggestionsBox = Instance.new("TextLabel")
+suggestionsBox.Text = "Suggestions: /fly, /noclip, /kick, /ban"
+suggestionsBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+suggestionsBox.TextSize = 12
+suggestionsBox.Size = UDim2.new(0, 260, 0, 30)
+suggestionsBox.Position = UDim2.new(0, 20, 0, 150)
+suggestionsBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+suggestionsBox.BackgroundTransparency = 0.3
+suggestionsBox.BorderSizePixel = 0
+suggestionsBox.Parent = menuFrame
+
+-- Input handling for the TextBox and Autocorrect functionality
+local commandList = {"/fly", "/noclip", "/kick", "/ban", "/spawn", "/discord", "/scriptinfo"}
+
+inputBox.FocusChanged:Connect(function()
+    local input = inputBox.Text:lower():trim()
+
+    -- Autocorrect feature: Display suggestions as the user types
+    local suggestions = {}
+    for _, command in ipairs(commandList) do
+        if command:find(input, 1, true) then
+            table.insert(suggestions, command)
         end
-
-        -- Clear the input field
-        inputBox.Text = ""
     end
+    suggestionsBox.Text = "Suggestions: " .. table.concat(suggestions, ", ")
+
+end)
+
+-- Execute the command when clicking "Execute"
+executeButton.MouseButton1Click:Connect(function()
+    local input = inputBox.Text:lower():trim()
+
+    -- Handle commands here, like "/fly", "/noclip", etc.
+    if input == "/fly" then
+        print("Fly command activated!")
+    elseif input == "/noclip" then
+        print("Noclip command activated!")
+    elseif input == "/kick" then
+        print("Kick command activated!")
+    elseif input == "/ban" then
+        print("Ban command activated!")
+    elseif input == "/spawn" then
+        print("Spawn command activated!")
+    elseif input == "/discord" then
+        print("Opening Discord link...")
+    elseif input == "/scriptinfo" then
+        print("Script info activated!")
+    else
+        print("Unknown command")
+    end
+
+    -- Clear the input field after execution
+    inputBox.Text = ""
 end)
