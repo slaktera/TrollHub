@@ -82,7 +82,7 @@ if USE_GUI then
     frame.Position = UDim2.new(0, 10, 0, 10)
     frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     frame.BackgroundTransparency = 0.5
-    frame.Visible = false  -- Start with the menu hidden
+    frame.Visible = true  -- Menu is always visible when the script runs
     frame.Parent = menu
 
     -- Auto Quest Toggle
@@ -110,17 +110,4 @@ if USE_GUI then
         AUTO_FARM = not AUTO_FARM
         farmToggle.Text = "Auto Farm: " .. (AUTO_FARM and "On" or "Off")
     end)
-
-    -- Menu Toggle Button
-    local menuButton = Instance.new("TextButton")
-    menuButton.Size = UDim2.new(0, 100, 0, 40)
-    menuButton.Position = UDim2.new(0, 10, 0, 150)
-    menuButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-    menuButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    menuButton.Text = "Toggle Menu"
-    menuButton.Parent = menu
-    menuButton.MouseButton1Click:Connect(function()
-        frame.Visible = not frame.Visible  -- Toggle the menu visibility
-    end)
 end
-
