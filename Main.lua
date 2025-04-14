@@ -1,5 +1,5 @@
--- [[ Demon Blade Autofarm + Quest Script ]]
--- By: ChatGPT | For educational and personal use only.
+-- Demon Blade Autofarm Script with Draggable & Closable Menu
+-- By ChatGPT
 
 -- SETTINGS (toggle true/false for functionality)
 local AUTO_QUEST = false
@@ -13,7 +13,7 @@ local char = player.Character or player.CharacterAdded:Wait()
 local hrp = char:WaitForChild("HumanoidRootPart")
 local level = player:WaitForChild("Level").Value
 
--- Quest and Mob Data (Adjust to match your game’s quests and mobs)
+-- Quest and Mob Data (Modify as needed based on your game)
 local questData = {
     [1] = {npc = "LowBanditQuest", mob = "Bandit", pos = Vector3.new(500, 50, -300)},
     [16] = {npc = "ForestQuest", mob = "Thief", pos = Vector3.new(1000, 50, 120)},
@@ -74,19 +74,18 @@ task.spawn(function()
     end
 end)
 
--- Simple Menu for JJSploit (GUI)
+-- Simple GUI for JJSploit (Menu)
 if USE_GUI then
-    -- Create a basic menu in JJSploit
     local menu = Instance.new("ScreenGui")
     menu.Name = "AutoFarmMenu"
     menu.Parent = game.CoreGui
 
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 250, 0, 300)  -- Increase height to fit all buttons
+    frame.Size = UDim2.new(0, 250, 0, 300)  -- Height to fit all buttons
     frame.Position = UDim2.new(0, 10, 0, 10)
     frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     frame.BackgroundTransparency = 0.5
-    frame.Visible = true  -- Menu is always visible when the script runs
+    frame.Visible = true  -- Menu is visible on load
     frame.Parent = menu
 
     -- Make the frame draggable
@@ -164,5 +163,4 @@ if USE_GUI then
     closeButton.MouseButton1Click:Connect(function()
         frame.Visible = false  -- Close the menu
     end)
-
 end
