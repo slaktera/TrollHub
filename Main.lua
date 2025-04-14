@@ -82,7 +82,7 @@ if USE_GUI then
     menu.Parent = game.CoreGui
 
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 250, 0, 200)
+    frame.Size = UDim2.new(0, 250, 0, 300)  -- Increase height to fit all buttons
     frame.Position = UDim2.new(0, 10, 0, 10)
     frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     frame.BackgroundTransparency = 0.5
@@ -164,4 +164,5 @@ if USE_GUI then
     closeButton.MouseButton1Click:Connect(function()
         frame.Visible = false  -- Close the menu
     end)
+
 end
