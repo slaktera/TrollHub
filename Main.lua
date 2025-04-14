@@ -85,6 +85,31 @@ if USE_GUI then
     frame.Visible = true  -- Menu is always visible when the script runs
     frame.Parent = menu
 
+    -- Make the frame draggable
+    local dragStart, dragInput, dragging = nil, nil, false
+
+    local function updateDrag(input)
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(frame.Position.X.Scale, frame.Position.X.Offset + delta.X, frame.Position.Y.Scale, frame.Position.Y.Offset + delta.Y)
+    end
+
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragStart = input.Position
+            dragging = true
+            input.Changed:Connect(function()
+                if not dragging then return end
+                updateDrag(input)
+            end)
+        end
+    end)
+
+    frame.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
     -- Auto Quest Toggle
     local questToggle = Instance.new("TextButton")
     questToggle.Size = UDim2.new(0, 230, 0, 50)
@@ -109,5 +134,17 @@ if USE_GUI then
     farmToggle.MouseButton1Click:Connect(function()
         AUTO_FARM = not AUTO_FARM
         farmToggle.Text = "Auto Farm: " .. (AUTO_FARM and "On" or "Off")
+    end)
+
+    -- Close Button to Hide the Menu
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0, 230, 0, 50)
+    closeButton.Position = UDim2.new(0, 10, 0, 140)
+    closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.Text = "Close Menu"
+    closeButton.Parent = frame
+    closeButton.MouseButton1Click:Connect(function()
+        frame.Visible = false  -- Close the menu
     end)
 end
