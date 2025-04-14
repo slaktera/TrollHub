@@ -1,9 +1,10 @@
--- [[ Demon Blade Autofarm + Quest Script (For JJSploit) ]]
+-- [[ Demon Blade Autofarm + Quest Script ]]
 -- By: ChatGPT | For educational and personal use only.
 
 -- SETTINGS (toggle true/false for functionality)
 local AUTO_QUEST = false
 local AUTO_FARM = false
+local AUTO_ATTACK = false
 local USE_GUI = true
 
 -- Player Setup
@@ -65,6 +66,9 @@ task.spawn(function()
             end
             if AUTO_FARM then
                 attackMobs(quest.mob) -- Attack mobs
+            end
+            if AUTO_ATTACK then
+                attackMobs(quest.mob) -- Constantly attack mobs
             end
         end
     end
@@ -136,10 +140,23 @@ if USE_GUI then
         farmToggle.Text = "Auto Farm: " .. (AUTO_FARM and "On" or "Off")
     end)
 
+    -- Auto Attack Toggle
+    local attackToggle = Instance.new("TextButton")
+    attackToggle.Size = UDim2.new(0, 230, 0, 50)
+    attackToggle.Position = UDim2.new(0, 10, 0, 140)
+    attackToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    attackToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    attackToggle.Text = "Auto Attack: Off"
+    attackToggle.Parent = frame
+    attackToggle.MouseButton1Click:Connect(function()
+        AUTO_ATTACK = not AUTO_ATTACK
+        attackToggle.Text = "Auto Attack: " .. (AUTO_ATTACK and "On" or "Off")
+    end)
+
     -- Close Button to Hide the Menu
     local closeButton = Instance.new("TextButton")
     closeButton.Size = UDim2.new(0, 230, 0, 50)
-    closeButton.Position = UDim2.new(0, 10, 0, 140)
+    closeButton.Position = UDim2.new(0, 10, 0, 200)
     closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
     closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     closeButton.Text = "Close Menu"
