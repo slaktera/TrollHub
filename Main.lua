@@ -50,32 +50,24 @@ closeButton.MouseButton1Click:Connect(function()
 	frame.Visible = false
 end)
 
--- Function to spawn item
-local function spawnItem(itemName)
+-- Function to spawn inventory item (e.g., fruit)
+local function spawnInventoryItem(itemName)
 	local item = game.ReplicatedStorage:FindFirstChild(itemName)
 
-	if item then
-		if item:IsA("Model") and not item.PrimaryPart then
-			messageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-			messageLabel.Text = "Model needs a PrimaryPart!"
-		else
-			local clone = item:Clone()
-			clone.Parent = game.Workspace
-			if clone:IsA("Model") then
-				clone:SetPrimaryPartCFrame(player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0))
-			elseif clone:IsA("Tool") or clone:IsA("Part") then
-				clone.CFrame = player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0)
-			end
-			messageLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-			messageLabel.Text = "Spawned: " .. itemName
-		end
+	if item and item:IsA("Tool") then
+		local clone = item:Clone()
+		-- Add the cloned item to the player's Backpack (inventory)
+		clone.Parent = player.Backpack
+		messageLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+		messageLabel.Text = "Added to inventory: " .. itemName
 	else
 		messageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-		messageLabel.Text = "Item not found: " .. itemName
+		messageLabel.Text = "Item not found or invalid: " .. itemName
 	end
 
+	-- Clear message after 10 seconds
 	task.delay(10, function()
-		messageLabel.Text = ""  -- Clear message after 10 seconds
+		messageLabel.Text = ""
 	end)
 end
 
@@ -83,22 +75,23 @@ end
 local function copyRepItems()
 	local spawnableItems = {}
 	for _, item in ipairs(game.ReplicatedStorage:GetChildren()) do
-		if item:IsA("Model") or item:IsA("Tool") or item:IsA("Part") then
+		if item:IsA("Tool") then  -- Look for tools (fruits, etc.)
 			table.insert(spawnableItems, item.Name)
 		end
 	end
 
 	if #spawnableItems > 0 then
-		local message = "Spawnable items: " .. table.concat(spawnableItems, ", ")
+		local message = "Available inventory items: " .. table.concat(spawnableItems, ", ")
 		messageLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
 		messageLabel.Text = message
 	else
 		messageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-		messageLabel.Text = "No spawnable items found."
+		messageLabel.Text = "No inventory items found."
 	end
 
+	-- Clear message after 10 seconds
 	task.delay(10, function()
-		messageLabel.Text = ""  -- Clear message after 10 seconds
+		messageLabel.Text = ""
 	end)
 end
 
@@ -108,12 +101,12 @@ submitButton.MouseButton1Click:Connect(function()
 	local args = string.split(command, " ")
 
 	if args[1] == "/spawn" and args[2] then
-		spawnItem(args[2])
+		spawnInventoryItem(args[2])  -- Spawn item in inventory (e.g., fruit)
 
 	elseif args[1] == "/spawnlist" then
 		local list = {}
 		for _, item in ipairs(game.ReplicatedStorage:GetChildren()) do
-			if item:IsA("Model") or item:IsA("Tool") or item:IsA("Part") then
+			if item:IsA("Tool") then  -- Look for tools (fruits, etc.)
 				table.insert(list, item.Name)
 			end
 		end
@@ -126,21 +119,23 @@ submitButton.MouseButton1Click:Connect(function()
 			messageLabel.Text = "No items found in ReplicatedStorage."
 		end
 
+		-- Clear message after 10 seconds
 		task.delay(10, function()
-			messageLabel.Text = ""  -- Clear message after 10 seconds
+			messageLabel.Text = ""
 		end)
 
 	elseif args[1] == "/copyrep" then
-		copyRepItems()
+		copyRepItems()  -- Copy and display available inventory items
 
 	else
 		messageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 		messageLabel.Text = "Invalid command."
 
+		-- Clear invalid message after 10 seconds
 		task.delay(10, function()
-			messageLabel.Text = ""  -- Clear invalid message after 10 seconds
+			messageLabel.Text = ""
 		end)
 	end
 
-	textBox.Text = "" -- Clear the input box
+	textBox.Text = ""  -- Clear the input box
 end)
