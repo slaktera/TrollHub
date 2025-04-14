@@ -31,7 +31,7 @@ end
 
 -- Function to send chat message and clear after delay
 local function sendMessageWithDelay(player, message, delayTime)
-    local chatMessage = player:SendChatMessage(message, Enum.ChatColor.Blue)
+    player:SendChatMessage(message, Enum.ChatColor.Blue)
     -- Wait for the specified time (e.g., 10 seconds)
     wait(delayTime)
     -- Clear the message by sending a blank one (this is a workaround)
@@ -84,9 +84,7 @@ Players.PlayerAdded:Connect(function(player)
             if #spawnableItems > 0 then
                 local message = "Spawnable items: " .. table.concat(spawnableItems, ", ")
                 -- Send the message to the player
-                player:SendChatMessage("Copying spawnable items: " .. table.concat(spawnableItems, ", "), Enum.ChatColor.Blue)
-                -- Optionally, you could also send the list as a **separate message** for better readability:
-                sendMessageWithDelay(player, message, 10)
+                sendMessageWithDelay(player, "Copying spawnable items: " .. table.concat(spawnableItems, ", "), 10)
             else
                 player:SendChatMessage("No spawnable items available in ReplicatedStorage.", Enum.ChatColor.Red)
             end
