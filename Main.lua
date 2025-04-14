@@ -1,4 +1,4 @@
--- Demon Blade Autofarm Script with Draggable & Closable Menu
+-- Demon Blade Autofarm Script with Redz-style Menu
 -- By ChatGPT
 
 -- SETTINGS (toggle true/false for functionality)
@@ -74,21 +74,22 @@ task.spawn(function()
     end
 end)
 
--- Simple GUI for JJSploit (Menu)
+-- Redz-style GUI for JJSploit (Menu)
 if USE_GUI then
+    -- Create the menu GUI
     local menu = Instance.new("ScreenGui")
-    menu.Name = "AutoFarmMenu"
+    menu.Name = "RedzAutoFarmMenu"
     menu.Parent = game.CoreGui
 
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 250, 0, 300)  -- Height to fit all buttons
+    frame.Size = UDim2.new(0, 300, 0, 400)  -- Customize the size of the menu
     frame.Position = UDim2.new(0, 10, 0, 10)
-    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    frame.BackgroundTransparency = 0.5
-    frame.Visible = true  -- Menu is visible on load
+    frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- Dark background color
+    frame.BackgroundTransparency = 0.2
+    frame.Visible = true  -- Menu visible on load
     frame.Parent = menu
 
-    -- Make the frame draggable
+    -- Draggable functionality for the frame
     local dragStart, dragInput, dragging = nil, nil, false
 
     local function updateDrag(input)
@@ -113,13 +114,26 @@ if USE_GUI then
         end
     end)
 
+    -- Title Label
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(0, 300, 0, 50)
+    title.Position = UDim2.new(0, 0, 0, 0)
+    title.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Red title background
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.Text = "Demon Blade AutoFarm"
+    title.TextSize = 20
+    title.TextCentered = true
+    title.Parent = frame
+
     -- Auto Quest Toggle
     local questToggle = Instance.new("TextButton")
-    questToggle.Size = UDim2.new(0, 230, 0, 50)
-    questToggle.Position = UDim2.new(0, 10, 0, 20)
-    questToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    questToggle.Size = UDim2.new(0, 280, 0, 50)
+    questToggle.Position = UDim2.new(0, 10, 0, 60)
+    questToggle.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
     questToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
     questToggle.Text = "Auto Quest: Off"
+    questToggle.Font = Enum.Font.SourceSans
+    questToggle.TextSize = 18
     questToggle.Parent = frame
     questToggle.MouseButton1Click:Connect(function()
         AUTO_QUEST = not AUTO_QUEST
@@ -128,11 +142,13 @@ if USE_GUI then
 
     -- Auto Farm Toggle
     local farmToggle = Instance.new("TextButton")
-    farmToggle.Size = UDim2.new(0, 230, 0, 50)
-    farmToggle.Position = UDim2.new(0, 10, 0, 80)
-    farmToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    farmToggle.Size = UDim2.new(0, 280, 0, 50)
+    farmToggle.Position = UDim2.new(0, 10, 0, 120)
+    farmToggle.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
     farmToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
     farmToggle.Text = "Auto Farm: Off"
+    farmToggle.Font = Enum.Font.SourceSans
+    farmToggle.TextSize = 18
     farmToggle.Parent = frame
     farmToggle.MouseButton1Click:Connect(function()
         AUTO_FARM = not AUTO_FARM
@@ -141,26 +157,31 @@ if USE_GUI then
 
     -- Auto Attack Toggle
     local attackToggle = Instance.new("TextButton")
-    attackToggle.Size = UDim2.new(0, 230, 0, 50)
-    attackToggle.Position = UDim2.new(0, 10, 0, 140)
-    attackToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    attackToggle.Size = UDim2.new(0, 280, 0, 50)
+    attackToggle.Position = UDim2.new(0, 10, 0, 180)
+    attackToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 200)
     attackToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
     attackToggle.Text = "Auto Attack: Off"
+    attackToggle.Font = Enum.Font.SourceSans
+    attackToggle.TextSize = 18
     attackToggle.Parent = frame
     attackToggle.MouseButton1Click:Connect(function()
         AUTO_ATTACK = not AUTO_ATTACK
         attackToggle.Text = "Auto Attack: " .. (AUTO_ATTACK and "On" or "Off")
     end)
 
-    -- Close Button to Hide the Menu
+    -- Close Button
     local closeButton = Instance.new("TextButton")
-    closeButton.Size = UDim2.new(0, 230, 0, 50)
-    closeButton.Position = UDim2.new(0, 10, 0, 200)
-    closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    closeButton.Size = UDim2.new(0, 280, 0, 50)
+    closeButton.Position = UDim2.new(0, 10, 0, 240)
+    closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Red color
     closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     closeButton.Text = "Close Menu"
+    closeButton.Font = Enum.Font.SourceSans
+    closeButton.TextSize = 18
     closeButton.Parent = frame
     closeButton.MouseButton1Click:Connect(function()
         frame.Visible = false  -- Close the menu
     end)
+
 end
