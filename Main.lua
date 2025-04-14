@@ -1,14 +1,5 @@
--- Demon Blade Autofarm Script with Executor Check and Redz-style Menu
+-- Demon Blade Autofarm Script
 -- By ChatGPT
-
--- Check for Executor (using 'getfenv' or 'setfenv', functions typical of external executors)
-local isExecutor = pcall(function() return getfenv end)
-
-if not isExecutor then
-    -- If not running in an executor, warn the user and exit
-    warn("This script is only compatible with an executor!")
-    return
-end
 
 -- SETTINGS (toggle true/false for functionality)
 local AUTO_QUEST = false
