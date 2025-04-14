@@ -54,15 +54,27 @@ end)
 local function spawnInventoryItem(itemName)
 	local item = game.ReplicatedStorage:FindFirstChild(itemName)
 
-	if item and item:IsA("Tool") then
-		local clone = item:Clone()
-		-- Add the cloned item to the player's Backpack (inventory)
-		clone.Parent = player.Backpack
+	-- Debugging: Check if item exists in ReplicatedStorage
+	if item then
 		messageLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-		messageLabel.Text = "Added to inventory: " .. itemName
+		messageLabel.Text = "Item found: " .. itemName  -- Show if item is found
+		print("Found item in ReplicatedStorage: " .. itemName)  -- Debugging output in output console
+
+		-- Ensure the item is a Tool (fruit)
+		if item:IsA("Tool") then
+			local clone = item:Clone()
+			-- Add the cloned item to the player's Backpack (inventory)
+			clone.Parent = player.Backpack
+			messageLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+			messageLabel.Text = "Added to inventory: " .. itemName
+		else
+			messageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+			messageLabel.Text = "Item is not a Tool: " .. itemName
+		end
 	else
 		messageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-		messageLabel.Text = "Item not found or invalid: " .. itemName
+		messageLabel.Text = "Item not found in ReplicatedStorage: " .. itemName
+		print("Item not found in ReplicatedStorage: " .. itemName)  -- Debugging output
 	end
 
 	-- Clear message after 10 seconds
@@ -100,9 +112,11 @@ submitButton.MouseButton1Click:Connect(function()
 	local command = textBox.Text
 	local args = string.split(command, " ")
 
+	-- Handle /spawn command
 	if args[1] == "/spawn" and args[2] then
 		spawnInventoryItem(args[2])  -- Spawn item in inventory (e.g., fruit)
 
+	-- Handle /spawnlist command
 	elseif args[1] == "/spawnlist" then
 		local list = {}
 		for _, item in ipairs(game.ReplicatedStorage:GetChildren()) do
@@ -124,6 +138,7 @@ submitButton.MouseButton1Click:Connect(function()
 			messageLabel.Text = ""
 		end)
 
+	-- Handle /copyrep command
 	elseif args[1] == "/copyrep" then
 		copyRepItems()  -- Copy and display available inventory items
 
